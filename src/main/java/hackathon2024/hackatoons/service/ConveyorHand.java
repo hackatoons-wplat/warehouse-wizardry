@@ -42,6 +42,7 @@ public class ConveyorHand extends SimpleApplication {
         app.start();
     }
 
+    @Override
     public void simpleInitApp() {
         initConveyorBelt();
         initCarriers();
