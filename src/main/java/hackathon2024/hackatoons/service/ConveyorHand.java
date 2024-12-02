@@ -1,13 +1,15 @@
 package hackathon2024.hackatoons.service;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.system.AppSettings;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
+import com.jme3.system.AppSettings;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -24,14 +26,6 @@ public class ConveyorHand extends SimpleApplication {
 
     private float conveyorSpeed = 2f;
 
-
-
-
-
-
-
-
-
     public static void main(String[] args) {
         ConveyorHand app = new ConveyorHand();
         AppSettings settings = new AppSettings(true);
@@ -47,6 +41,7 @@ public class ConveyorHand extends SimpleApplication {
         initConveyorBelt();
         initCarriers();
         initHand();
+        addLighting();  // Add lighting to the scene
 
         // Set up the camera
         cam.setLocation(new Vector3f(0, 8, 15));
@@ -74,32 +69,64 @@ public class ConveyorHand extends SimpleApplication {
     }
 
     private Carrier createCarrier(int index, boolean isHeavy) {
-        // Create a box for the carrier
-        Box carrierShape = new Box(0.5f, 0.5f, 0.5f);
-        Geometry carrierGeometry = new Geometry("Carrier" + index, carrierShape);
-        Material carrierMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        carrierMaterial.setColor("Color", isHeavy ? ColorRGBA.Red : ColorRGBA.Blue);
-        carrierGeometry.setMaterial(carrierMaterial);
+        Node carrierNode = new Node("Carrier" + index);
+
+        if (isHeavy) {
+            // Create a red box for the heavy carrier
+            Box carrierShape = new Box(0.5f, 0.5f, 0.5f);
+            Geometry carrierGeometry = new Geometry("HeavyCarrier" + index, carrierShape);
+            Material carrierMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+            carrierMaterial.setColor("Diffuse", ColorRGBA.Red);
+            carrierMaterial.setBoolean("UseMaterialColors", true);
+            carrierGeometry.setMaterial(carrierMaterial);
+            carrierNode.attachChild(carrierGeometry);
+        } else {
+            // Load the OBJ file for the normal (blue) carrier
+            Node carrierModel = (Node) assetManager.loadModel("Models/box-small.obj");
+
+            // Set the scale and translation if needed
+            carrierModel.setLocalScale(0.5f);
+            carrierModel.setLocalTranslation(0, 0.5f, 0);
+
+            // Attach the OBJ model to the node
+            carrierNode.attachChild(carrierModel);
+        }
 
         // Position the carrier initially off the belt
-        carrierGeometry.setLocalTranslation(-10 - index * 2, 0.5f, 0);
-        conveyorBeltNode.attachChild(carrierGeometry);
+        carrierNode.setLocalTranslation(-10 - index * 2, 0.5f, 0);
 
-        return new Carrier(carrierGeometry, isHeavy);
+        // Attach the node to the conveyor belt
+        conveyorBeltNode.attachChild(carrierNode);
+
+        return new Carrier(carrierNode, isHeavy);
     }
 
     private void initHand() {
         // Create a simple "hand" to pick up the heavy carrier
         Box handShape = new Box(1, 0.1f, 1);
         humanHand = new Geometry("Hand", handShape);
-        Material handMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        handMaterial.setColor("Color", ColorRGBA.Brown);
+        Material handMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+        handMaterial.setColor("Diffuse", ColorRGBA.Brown);
+        handMaterial.setBoolean("UseMaterialColors", true);
         humanHand.setMaterial(handMaterial);
 
         // Position the hand above the conveyor belt
         humanHand.setLocalTranslation(0, 3, 0);
         handNode.attachChild(humanHand);
         rootNode.attachChild(handNode);
+    }
+
+    private void addLighting() {
+        // Add directional light (simulating sunlight)
+        DirectionalLight sun = new DirectionalLight();
+        sun.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
+        sun.setColor(ColorRGBA.White);
+        rootNode.addLight(sun);
+
+        // Add ambient light for general illumination
+        AmbientLight ambient = new AmbientLight();
+        ambient.setColor(ColorRGBA.White.mult(0.5f));  // Set the intensity of the ambient light
+        rootNode.addLight(ambient);
     }
 
     @Override
@@ -112,20 +139,20 @@ public class ConveyorHand extends SimpleApplication {
 
         // Move all carriers on the conveyor belt
         for (Carrier carrier : carriers) {
-            carrier.geometry.move(conveyorSpeed * tpf, 0, 0);
+            carrier.move(conveyorSpeed * tpf, 0, 0);
         }
 
         // Check for the heavy carrier reaching the center
         if (!carriers.isEmpty() && !isPickingUp) {
             Carrier carrier = carriers.peek();
-            if (carrier.geometry.getLocalTranslation().x >= 0) {
+            if (carrier.getLocalTranslation().x >= 0) {
                 if (carrier.isHeavy) {
                     // Highlight the heavy carrier and initiate pickup
-                    currentHeavyCarrier = carrier.geometry;
+                    currentHeavyCarrier = (Geometry) carrier.node.getChild(0);
                     isPickingUp = true;
                 } else {
                     // Remove the carrier from the queue (normal weight)
-                    conveyorBeltNode.detachChild(carrier.geometry);
+                    conveyorBeltNode.detachChild(carrier.node);
                     carriers.poll();
                 }
             }
@@ -157,14 +184,20 @@ public class ConveyorHand extends SimpleApplication {
 
     // Class to represent each carrier
     private static class Carrier {
-        Geometry geometry;
+        Node node;
         boolean isHeavy;
 
-        Carrier(Geometry geometry, boolean isHeavy) {
-            this.geometry = geometry;
+        Carrier(Node node, boolean isHeavy) {
+            this.node = node;
             this.isHeavy = isHeavy;
+        }
+
+        public void move(float x, float y, float z) {
+            node.move(x, y, z);
+        }
+
+        public Vector3f getLocalTranslation() {
+            return node.getLocalTranslation();
         }
     }
 }
-
-
