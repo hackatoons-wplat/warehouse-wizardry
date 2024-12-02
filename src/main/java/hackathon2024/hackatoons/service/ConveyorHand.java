@@ -38,6 +38,7 @@ public class ConveyorHand extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        initFloor();
         initConveyorBelt();
         initCarriers();
         initHand();
@@ -99,6 +100,27 @@ public class ConveyorHand extends SimpleApplication {
         conveyorBeltNode.attachChild(carrierNode);
 
         return new Carrier(carrierNode, isHeavy);
+    }
+
+    private void initFloor() {
+        int gridSize = 50; // Number of tiles along one direction
+        float tileSize = 10f; // Size of each tile (match with OBJ model dimensions if required)
+
+        Node floorNode = new Node("Floor");
+
+        // Loop over all quadrants (X: negative, positive; Z: negative, positive)
+        for (int x = -gridSize; x < gridSize; x++) {
+            for (int z = -gridSize; z < gridSize; z++) {
+                // Load the floor tile model
+                Node floorTile = (Node) assetManager.loadModel("Models/floor-large.obj");
+                floorTile.setLocalScale(4.5f); // Scale if necessary
+                // Position tiles in all quadrants
+                floorTile.setLocalTranslation(x * tileSize, -0.1f, z * tileSize); // Position tiles
+                floorNode.attachChild(floorTile);
+            }
+        }
+
+        rootNode.attachChild(floorNode);
     }
 
     private void initHand() {
