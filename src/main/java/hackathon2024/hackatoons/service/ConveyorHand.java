@@ -1,16 +1,19 @@
 package hackathon2024.hackatoons.service;
 
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.app.SimpleApplication;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
+import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
-import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
+import com.jme3.light.AmbientLight;
+import com.jme3.light.DirectionalLight;
+import com.jme3.system.AppSettings;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -40,19 +43,17 @@ public class ConveyorHand extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         initFloor();
-        //initConveyorBelt();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
         initCarriers();
         initHand();
         addLighting();  // Add lighting to the scene
-
+        initConveyorBarsHorizontal(); // Initialize the conveyor bars array
+        initConveyorBarsVertical(); // Initialize the conveyor bars array
         // Set up the camera
         cam.setLocation(new Vector3f(0, 8, 15));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
     }
-
-
 
     private void createHorizontalConveyorBelt() {
         // Create the conveyor belt
@@ -62,7 +63,6 @@ public class ConveyorHand extends SimpleApplication {
 
         Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
         beltMaterial.setTexture("ColorMap", texture);
-        // beltMaterial.setColor("Color", ColorRGBA.Gray);
         conveyorBelt.setMaterial(beltMaterial);
         conveyorBelt.setLocalTranslation(0, 0, 0);
         conveyorBeltNode.attachChild(conveyorBelt);
@@ -76,21 +76,8 @@ public class ConveyorHand extends SimpleApplication {
         Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
         beltMaterial.setTexture("ColorMap", texture);
-        //beltMaterial.setColor("Color", ColorRGBA.Gray);
         conveyorBelt.setMaterial(beltMaterial);
         conveyorBelt.setLocalTranslation(10, 0, 0);
-        conveyorBeltNode.attachChild(conveyorBelt);
-        rootNode.attachChild(conveyorBeltNode);
-    }
-
-    private void initConveyorBelt() {
-        // Create the conveyor belt
-        Box beltShape = new Box(20, 0.1f, 2);
-        Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
-        Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        beltMaterial.setColor("Color", ColorRGBA.Gray);
-        conveyorBelt.setMaterial(beltMaterial);
-        conveyorBelt.setLocalTranslation(0, 0, 0);
         conveyorBeltNode.attachChild(conveyorBelt);
         rootNode.attachChild(conveyorBeltNode);
     }
@@ -241,13 +228,64 @@ public class ConveyorHand extends SimpleApplication {
             currentHeavyCarrier = null;
             isPickingUp = false;
             handProgress = 0;
-
-            // Reset hand position
-            humanHand.setLocalTranslation(0, 3, 0);
         }
     }
 
-    // Class to represent each carrier
+    private void initConveyorBarsHorizontal() {
+        int numBars = 5; // Number of conveyor bars
+        float barSpacing = 2f; // Space between each conveyor bar
+        float barSize = 2f; // Size of each conveyor bar (adjust if necessary)
+
+        Node conveyorBarsNode = new Node("ConveyorBars"); // Node to hold all the bars
+
+        for (int i = -5; i < numBars; i++) {
+            // Load the conveyor bar model
+            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-high.obj");
+
+            // Scale the model if needed (you can adjust scale)
+            conveyorBarModel.setLocalScale(barSize);
+
+            // Set the position of each bar in the one-dimensional array
+            conveyorBarModel.setLocalTranslation(i * barSpacing, 0, 0); // Spaced along the x-axis
+
+            // Attach the model to the conveyorBarsNode
+            conveyorBarsNode.attachChild(conveyorBarModel);
+        }
+
+        // Attach the conveyorBarsNode to the rootNode or any other parent node
+        rootNode.attachChild(conveyorBarsNode);
+    }
+
+    private void initConveyorBarsVertical() {
+        int numBars = 10; // Number of conveyor bars
+        float barSpacing = 2f; // Space between each conveyor bar
+        float barSize = 2f; // Size of each conveyor bar (adjust if necessary)
+
+        Node conveyorBarsNode = new Node("ConveyorBars"); // Node to hold all the bars
+
+        for (int i = -10; i < numBars; i++) {
+            // Load the conveyor bar model
+            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-high.obj");
+
+            // Scale the model if needed (you can adjust scale)
+            conveyorBarModel.setLocalScale(barSize);
+
+            // Apply a 90-degree rotation around the Z-axis
+            conveyorBarModel.setLocalRotation(new Quaternion().fromAngleAxis(FastMath.PI / 2, Vector3f.UNIT_Y));
+
+            // Set the position of each bar in the one-dimensional array (now spaced along the y-axis)
+            conveyorBarModel.setLocalTranslation(10, 0,i * barSpacing); // Spaced along the y-axis due to rotation
+
+            // Attach the model to the conveyorBarsNode
+            conveyorBarsNode.attachChild(conveyorBarModel);
+        }
+
+        // Attach the conveyorBarsNode to the rootNode or any other parent node
+        rootNode.attachChild(conveyorBarsNode);
+    }
+
+
+    // Carrier class to manage each carrier
     private static class Carrier {
         Node node;
         boolean isHeavy;
@@ -257,12 +295,12 @@ public class ConveyorHand extends SimpleApplication {
             this.isHeavy = isHeavy;
         }
 
-        public void move(float x, float y, float z) {
-            node.move(x, y, z);
-        }
-
         public Vector3f getLocalTranslation() {
             return node.getLocalTranslation();
+        }
+
+        public void move(float x, float y, float z) {
+            node.move(x, y, z);
         }
     }
 }

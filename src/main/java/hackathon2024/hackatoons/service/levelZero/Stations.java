@@ -37,7 +37,7 @@ public class Stations extends SimpleApplication {
         initStation();
 
         // Set up the camera
-        cam.setLocation(new Vector3f(0, 8, 15));
+        cam.setLocation(new Vector3f(0, 12, 20));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
     }
 
@@ -83,7 +83,7 @@ public class Stations extends SimpleApplication {
         carrierGeometry.setMaterial(carrierMaterial);
 
         // Position the carrier initially off the belt
-        carrierGeometry.setLocalTranslation(-10 - index * 2, 0.5f, 0);
+        carrierGeometry.setLocalTranslation(index, 0.5f, 0);
         conveyorBeltNode.attachChild(carrierGeometry);
 
         return new Carrier(carrierGeometry, isHeavy);
