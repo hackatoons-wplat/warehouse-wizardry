@@ -112,7 +112,7 @@ public class ConveyorHand extends SimpleApplication {
     }
 
     private void initFloor() {
-        int gridSize = 50; // Number of tiles along one direction
+        int gridSize = 10; // Number of tiles along one direction
         float tileSize = 10f; // Size of each tile (match with OBJ model dimensions if required)
 
         Node floorNode = new Node("Floor");
@@ -122,7 +122,7 @@ public class ConveyorHand extends SimpleApplication {
             for (int z = -gridSize; z < gridSize; z++) {
                 // Load the floor tile model
                 Node floorTile = (Node) assetManager.loadModel("Models/floor-large.obj");
-                floorTile.setLocalScale(4.5f); // Scale if necessary
+                floorTile.setLocalScale(4.8f); // Scale if necessary
                 // Position tiles in all quadrants
                 floorTile.setLocalTranslation(x * tileSize, -0.1f, z * tileSize); // Position tiles
                 floorNode.attachChild(floorTile);
