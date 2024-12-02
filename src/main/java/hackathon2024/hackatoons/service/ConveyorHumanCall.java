@@ -1,4 +1,4 @@
-package com.example.demo;
+package hackathon2024.hackatoons.service;
 import com.jme3.anim.AnimComposer;
 //import com.jme3.anim.AnimControl;
 import com.jme3.app.SimpleApplication;
