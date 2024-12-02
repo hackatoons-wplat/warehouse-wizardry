@@ -85,7 +85,7 @@ public class ConveyorHand extends SimpleApplication {
             Node carrierModel = (Node) assetManager.loadModel("Models/box-small.obj");
 
             // Set the scale and translation if needed
-            carrierModel.setLocalScale(0.5f);
+            carrierModel.setLocalScale(2f);
             carrierModel.setLocalTranslation(0, 0.5f, 0);
 
             // Attach the OBJ model to the node
