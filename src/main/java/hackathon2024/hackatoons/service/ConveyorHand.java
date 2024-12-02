@@ -1,6 +1,7 @@
 package hackathon2024.hackatoons.service;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.system.AppSettings;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -33,6 +34,11 @@ public class ConveyorHand extends SimpleApplication {
 
     public static void main(String[] args) {
         ConveyorHand app = new ConveyorHand();
+        AppSettings settings = new AppSettings(true);
+        settings.setTitle("Warehouse Wizardry");
+        settings.setResolution(1280, 720);
+        settings.setFullscreen(false);
+        app.setSettings(settings);
         app.start();
     }
 
