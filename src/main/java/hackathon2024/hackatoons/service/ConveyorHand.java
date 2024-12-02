@@ -10,6 +10,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -39,7 +40,9 @@ public class ConveyorHand extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         initFloor();
-        initConveyorBelt();
+        //initConveyorBelt();
+        createHorizontalConveyorBelt();
+        createVerticalConveyorBelt();
         initCarriers();
         initHand();
         addLighting();  // Add lighting to the scene
@@ -49,9 +52,40 @@ public class ConveyorHand extends SimpleApplication {
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
     }
 
+
+
+    private void createHorizontalConveyorBelt() {
+        // Create the conveyor belt
+        Box beltShape = new Box(10, 0.1f, 1);
+        Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
+        Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+
+        Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
+        beltMaterial.setTexture("ColorMap", texture);
+        // beltMaterial.setColor("Color", ColorRGBA.Gray);
+        conveyorBelt.setMaterial(beltMaterial);
+        conveyorBelt.setLocalTranslation(0, 0, 0);
+        conveyorBeltNode.attachChild(conveyorBelt);
+        rootNode.attachChild(conveyorBeltNode);
+    }
+
+    private void createVerticalConveyorBelt() {
+        // Create the conveyor belt
+        Box beltShape = new Box(1, 0.1f, 20);
+        Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
+        Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
+        beltMaterial.setTexture("ColorMap", texture);
+        //beltMaterial.setColor("Color", ColorRGBA.Gray);
+        conveyorBelt.setMaterial(beltMaterial);
+        conveyorBelt.setLocalTranslation(10, 0, 0);
+        conveyorBeltNode.attachChild(conveyorBelt);
+        rootNode.attachChild(conveyorBeltNode);
+    }
+
     private void initConveyorBelt() {
         // Create the conveyor belt
-        Box beltShape = new Box(10, 0.1f, 2);
+        Box beltShape = new Box(20, 0.1f, 2);
         Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
         Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         beltMaterial.setColor("Color", ColorRGBA.Gray);
@@ -82,7 +116,7 @@ public class ConveyorHand extends SimpleApplication {
 
             // Apply scale and translation if needed
             carrierGeometry.setLocalScale(2f);
-            carrierGeometry.setLocalTranslation(0, 0.5f, 0);
+            carrierGeometry.setLocalTranslation(0, 0.01f, 0);
 
             // Attach the geometry to the carrier node
             carrierNode.attachChild(carrierGeometry);
@@ -96,14 +130,14 @@ public class ConveyorHand extends SimpleApplication {
 
             // Apply scale and translation if needed
             carrierGeometry.setLocalScale(2f);
-            carrierGeometry.setLocalTranslation(0, 0.5f, 0);
+            carrierGeometry.setLocalTranslation(8, 0.01f, 0);
 
             // Attach the geometry to the carrier node
             carrierNode.attachChild(carrierGeometry);
         }
 
         // Position the carrier initially off the belt
-        carrierNode.setLocalTranslation(-10 - index * 2, 0.5f, 0);
+        carrierNode.setLocalTranslation(-10 - index * 2, 0.01f, 0);
 
         // Attach the carrier node to the conveyor belt
         conveyorBeltNode.attachChild(carrierNode);
