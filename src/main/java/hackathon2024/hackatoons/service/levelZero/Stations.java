@@ -6,6 +6,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 
 import java.util.LinkedList;
@@ -53,13 +54,14 @@ public class Stations extends SimpleApplication {
     }
 
     private void initStation() {
-        // Create the station
-        Box stationShape = new Box(1, 1, 1);
-        Geometry station = new Geometry("Station", stationShape);
-        Material stationMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        stationMaterial.setColor("Color", ColorRGBA.Green);
-        station.setMaterial(stationMaterial);
-        station.setLocalTranslation(-12, 0.5f, 0); // Position the station at the start of the conveyor belt
+
+        Spatial station = assetManager.loadModel("Models/scanner-low.glb"); // Add your .glb file path
+        station.setLocalTranslation(-8f, 0, 0); // Position the station at the start of the conveyor belt
+        station.scale(2.5f);
+        // Create and apply saffron material
+        Material saffronMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        saffronMaterial.setColor("Color", new ColorRGBA(1.0f, 0.6f, 0.2f, 1.0f)); // Saffron color
+        station.setMaterial(saffronMaterial);
         stationNode.attachChild(station);
         rootNode.attachChild(stationNode);
     }
