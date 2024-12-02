@@ -176,6 +176,9 @@ public class ConveyorHand extends SimpleApplication {
         humanHand.setLocalTranslation(0, 3, 0);
         handNode.attachChild(humanHand);
         rootNode.attachChild(handNode);
+
+
+        
     }
 
     private void addLighting() {
