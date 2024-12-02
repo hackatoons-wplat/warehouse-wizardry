@@ -71,32 +71,41 @@ public class ConveyorHand extends SimpleApplication {
 
     private Carrier createCarrier(int index, boolean isHeavy) {
         Node carrierNode = new Node("Carrier" + index);
+        Geometry carrierGeometry = null;
 
         if (isHeavy) {
-            // Create a red box for the heavy carrier
-            Box carrierShape = new Box(0.5f, 0.5f, 0.5f);
-            Geometry carrierGeometry = new Geometry("HeavyCarrier" + index, carrierShape);
-            Material carrierMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-            carrierMaterial.setColor("Diffuse", ColorRGBA.Red);
-            carrierMaterial.setBoolean("UseMaterialColors", true);
-            carrierGeometry.setMaterial(carrierMaterial);
+            // Load the OBJ model for the heavy carrier (box-large.obj)
+            Node carrierModel = (Node) assetManager.loadModel("Models/box-large.obj");
+
+            // Access the geometry from the model (assuming there is one)
+            carrierGeometry = (Geometry) carrierModel.getChild(0); // Assuming the model has a single geometry
+
+            // Apply scale and translation if needed
+            carrierGeometry.setLocalScale(2f);
+            carrierGeometry.setLocalTranslation(0, 0.5f, 0);
+
+            // Attach the geometry to the carrier node
             carrierNode.attachChild(carrierGeometry);
+
         } else {
-            // Load the OBJ file for the normal (blue) carrier
+            // Load the OBJ model for the normal (blue) carrier (box-small.obj)
             Node carrierModel = (Node) assetManager.loadModel("Models/box-small.obj");
 
-            // Set the scale and translation if needed
-            carrierModel.setLocalScale(2f);
-            carrierModel.setLocalTranslation(0, 0.5f, 0);
+            // Access the geometry from the model (assuming there is one)
+            carrierGeometry = (Geometry) carrierModel.getChild(0); // Assuming the model has a single geometry
 
-            // Attach the OBJ model to the node
-            carrierNode.attachChild(carrierModel);
+            // Apply scale and translation if needed
+            carrierGeometry.setLocalScale(2f);
+            carrierGeometry.setLocalTranslation(0, 0.5f, 0);
+
+            // Attach the geometry to the carrier node
+            carrierNode.attachChild(carrierGeometry);
         }
 
         // Position the carrier initially off the belt
         carrierNode.setLocalTranslation(-10 - index * 2, 0.5f, 0);
 
-        // Attach the node to the conveyor belt
+        // Attach the carrier node to the conveyor belt
         conveyorBeltNode.attachChild(carrierNode);
 
         return new Carrier(carrierNode, isHeavy);
