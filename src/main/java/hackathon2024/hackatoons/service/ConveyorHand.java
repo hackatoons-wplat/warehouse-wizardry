@@ -42,6 +42,19 @@ public class ConveyorHand extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        // Disable default camera movement (keyboard and mouse drag)
+        flyCam.setEnabled(false);  // Disables the fly camera control
+
+        // Set camera to a fixed position and orientation
+        cam.setLocation(new Vector3f(0, 14, 25)); // Fixed camera position
+        cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y); // Camera fixed to look at the origin
+
+        // Enable mouse cursor
+        setDisplayStatView(false);  // Hides stats
+        setDisplayFps(false);  // Hides FPS
+        inputManager.setCursorVisible(true);  // Makes the cursor visible
+
+        // Continue with your other initialization
         initFloor();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
@@ -50,9 +63,6 @@ public class ConveyorHand extends SimpleApplication {
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
-        // Set up the camera
-        cam.setLocation(new Vector3f(0, 8, 15));
-        cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
     }
 
     private void createHorizontalConveyorBelt() {
@@ -61,8 +71,8 @@ public class ConveyorHand extends SimpleApplication {
         Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
         Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
 
-        Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
-        beltMaterial.setTexture("ColorMap", texture);
+        //Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
+        //beltMaterial.setTexture("ColorMap", texture);
         conveyorBelt.setMaterial(beltMaterial);
         conveyorBelt.setLocalTranslation(0, 0, 0);
         conveyorBeltNode.attachChild(conveyorBelt);
@@ -74,8 +84,8 @@ public class ConveyorHand extends SimpleApplication {
         Box beltShape = new Box(1, 0.1f, 20);
         Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
         Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
-        beltMaterial.setTexture("ColorMap", texture);
+        //Texture texture = assetManager.loadTexture("Textures/ConveyorBelt.png"); // Replace with actual texture
+        //beltMaterial.setTexture("ColorMap", texture);
         conveyorBelt.setMaterial(beltMaterial);
         conveyorBelt.setLocalTranslation(10, 0, 0);
         conveyorBeltNode.attachChild(conveyorBelt);
