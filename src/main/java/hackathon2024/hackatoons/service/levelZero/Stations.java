@@ -1,7 +1,6 @@
-package hackathon2024.hackatoons.service;
+package hackathon2024.hackatoons.service.levelZero;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.system.AppSettings;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -12,9 +11,10 @@ import com.jme3.scene.shape.Box;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class ConveyorHand extends SimpleApplication {
+public class Stations extends SimpleApplication {
 
     private Node conveyorBeltNode = new Node("ConveyorBelt");
+    private Node stationNode = new Node("Station");
     private Node handNode = new Node("Hand");
     private Queue<Carrier> carriers = new LinkedList<>();
     private Geometry humanHand;
@@ -24,21 +24,8 @@ public class ConveyorHand extends SimpleApplication {
 
     private float conveyorSpeed = 2f;
 
-
-
-
-
-
-
-
-
     public static void main(String[] args) {
-        ConveyorHand app = new ConveyorHand();
-        AppSettings settings = new AppSettings(true);
-        settings.setTitle("Warehouse Wizardry");
-        settings.setResolution(1280, 720);
-        settings.setFullscreen(false);
-        app.setSettings(settings);
+        Stations app = new Stations();
         app.start();
     }
 
@@ -46,6 +33,7 @@ public class ConveyorHand extends SimpleApplication {
         initConveyorBelt();
         initCarriers();
         initHand();
+        initStation();
 
         // Set up the camera
         cam.setLocation(new Vector3f(0, 8, 15));
@@ -62,6 +50,18 @@ public class ConveyorHand extends SimpleApplication {
         conveyorBelt.setLocalTranslation(0, 0, 0);
         conveyorBeltNode.attachChild(conveyorBelt);
         rootNode.attachChild(conveyorBeltNode);
+    }
+
+    private void initStation() {
+        // Create the station
+        Box stationShape = new Box(1, 1, 1);
+        Geometry station = new Geometry("Station", stationShape);
+        Material stationMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        stationMaterial.setColor("Color", ColorRGBA.Green);
+        station.setMaterial(stationMaterial);
+        station.setLocalTranslation(-12, 0.5f, 0); // Position the station at the start of the conveyor belt
+        stationNode.attachChild(station);
+        rootNode.attachChild(stationNode);
     }
 
     private void initCarriers() {
@@ -165,5 +165,6 @@ public class ConveyorHand extends SimpleApplication {
         }
     }
 }
+
 
 
