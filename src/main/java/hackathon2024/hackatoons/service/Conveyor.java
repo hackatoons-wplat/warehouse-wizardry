@@ -60,26 +60,36 @@ public class Conveyor extends SimpleApplication {
                         Thread.sleep(10);  // Control movement speed (10ms step delay)
                     }
                 }
+                carrierNode.detachChild(carrierModel);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
+    private void initCarriers() throws InterruptedException {
+        for (int i = 0; i < 10 ; i++) {
+            initCarrier(assetManager, Arrays.asList(
+                    new Vector3f(0, 0.25f, 0),
+                    new Vector3f(5, 0.25f, 0),
+                    new Vector3f(10, 0.25f, 0),
+                    new Vector3f(10, 0.25f, -10),
+                    new Vector3f(10, 0.25f, 10)
+            ), 2f);
+            Thread.sleep(1000);  // Control movement speed (10ms step delay)
+        }
+    }
+
     @Override
     public void simpleInitApp() {
         initConveyorBars(assetManager);
-        List<Vector3f> keyframesList = Arrays.asList(
-                new Vector3f(0, 0, 0),
-                new Vector3f(5, 0, 0),
-                new Vector3f(5, 0, 5),
-                new Vector3f(0, 0, 5)
-        );
-
-        float speed = 2f;  // Carrier movement speed
-
-// Initialize the carrier and start movement
-        initCarrier(assetManager, keyframesList, speed);
+        //initCarrier(assetManager, keyframesList, speed);
+        try {
+            initCarriers();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        initFloor();
         initConveyorBarsVertical(assetManager);
         initConveyorBarsVerticalUp(assetManager);
         addAmbientLighting();
@@ -152,6 +162,26 @@ public class Conveyor extends SimpleApplication {
         rootNode.addLight(ambient);
     }
 
+    private void initFloor() {
+        int gridSize = 10; // Number of tiles along one direction
+        float tileSize = 10f; // Size of each tile (match with OBJ model dimensions if required)
+
+        Node floorNode = new Node("Floor");
+
+        // Loop over all quadrants (X: negative, positive; Z: negative, positive)
+        for (int x = -gridSize; x < gridSize; x++) {
+            for (int z = -gridSize; z < gridSize; z++) {
+                // Load the floor tile model
+                Node floorTile = (Node) assetManager.loadModel("Models/floor-large.obj");
+                floorTile.setLocalScale(4.8f); // Scale if necessary
+                // Position tiles in all quadrants
+                floorTile.setLocalTranslation(x * tileSize, -0.1f, z * tileSize); // Position tiles
+                floorNode.attachChild(floorTile);
+            }
+        }
+
+        rootNode.attachChild(floorNode);
+    }
     public void setupCamera() {
         // Position the camera to provide a good view of the conveyor bars
         cam.setLocation(new Vector3f(0, 5, 15));
