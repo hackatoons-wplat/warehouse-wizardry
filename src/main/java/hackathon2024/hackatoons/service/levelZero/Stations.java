@@ -23,6 +23,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
+import hackathon2024.hackatoons.service.LoadingWindow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +84,6 @@ public class Stations extends SimpleApplication {
         float speed = 2f;  // Carrier movement speed
 
         initCarrier(assetManager, keyframesList, speed);
-//        initCarriers();
         initStation();
 
         initSystemExit();
@@ -91,7 +91,7 @@ public class Stations extends SimpleApplication {
         initFloor();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
-//        initCarriers();
+
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
