@@ -168,6 +168,11 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
             return false;
         });
 
+        //carriersNotPassed = totalCarrierCount - carriers.size();
+        //float progress = carriersPassed / totalCarrierCount;
+        //progressBarForeground.setMesh(new Quad(progress * 400, 20));
+
+        
         // Update progress bar
         carriersPassed = totalCarrierCount - carriers.size();
         float progress = carriersPassed / totalCarrierCount;
@@ -193,7 +198,7 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
     }
 
     private void updateTextFields() {
-        validCarrierText.setText("Valid: " + validCarriers);
+        validCarrierText.setText("Valid: " + validCarriers); //needs more validation
         invalidCarrierText.setText("Invalid: " + invalidCarriers);
     }
 
