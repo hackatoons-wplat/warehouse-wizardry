@@ -37,6 +37,7 @@ public class Stations extends SimpleApplication {
     private boolean isPaused = false;
     private boolean isBoxMoved = false;
     private List<Vector3f> keyframesList = new ArrayList<>();
+    private BitmapText tooltip;
 
 
     private float conveyorSpeed = 2f;
@@ -384,6 +385,14 @@ public class Stations extends SimpleApplication {
         carrierNode.attachChild(carrierModel);
         rootNode.attachChild(carrierNode);
 
+        tooltip = new BitmapText(guiFont, false);
+        tooltip.setSize(.5f);
+        tooltip.setText("Click for Action");
+        tooltip.setColor(ColorRGBA.White);
+        tooltip.setLocalTranslation(7, 5, 5);  // Adjust position relative to the carrier
+        tooltip.setCullHint(Spatial.CullHint.Always);
+        rootNode.attachChild(tooltip);
+
         // Movement logic
         new Thread(() -> {
             try {
@@ -410,7 +419,9 @@ public class Stations extends SimpleApplication {
                             isPaused = true;   // Indicate that movement is paused
                             setupInput();      // Setup input listeners
 
+                            enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Never));  // Show tooltip
                             Thread.sleep(3000);
+                            enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Always));  // Hide tooltip
                             isPaused = false;
                         }
 
