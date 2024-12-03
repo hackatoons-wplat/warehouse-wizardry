@@ -112,7 +112,7 @@ public class Stations extends SimpleApplication {
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(0.8f);
-        title.setText("Goods Intake");
+        title.setText("Receiving Dock");
         title.setColor(ColorRGBA.White);
         title.setLocalTranslation(-9f, 5f, 0); // Adjust the position as needed
         stationNode.attachChild(title);
@@ -232,7 +232,7 @@ public class Stations extends SimpleApplication {
         conveyorBelt.setLocalTranslation(0, 0, 0);
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(0.8f);
-        title.setText("Conveyor Belt");
+        title.setText("Transport Belt");
         title.setColor(ColorRGBA.White);
         title.setLocalTranslation(-2f, 1f, -3f);
         conveyorBeltNode.attachChild(title);
@@ -350,7 +350,7 @@ public class Stations extends SimpleApplication {
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(1f);
-        title.setText("Storage");
+        title.setText("Stock Room");
         title.setColor(ColorRGBA.White);
         title.setLocalTranslation(8f, 5f, -21f); // Adjust the position as needed
         conveyorBeltNode.attachChild(title);
@@ -369,7 +369,7 @@ public class Stations extends SimpleApplication {
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(0.7f);
-        title.setText("System Exit");
+        title.setText("Exit Dock");
         title.rotate(0,-FastMath.HALF_PI,0);
         title.setColor(ColorRGBA.White);
         title.setLocalTranslation(8f, 3f, 18f); // Adjust the position as needed
