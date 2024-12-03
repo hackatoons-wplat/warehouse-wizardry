@@ -63,7 +63,8 @@ public class Stations extends SimpleApplication {
 
     public void simpleInitApp() {
          initQuitButton();
-
+        setDisplayFps(false);
+        setDisplayStatView(false);
         levelUp();
         // Initialize the audio node
         audioNode = new AudioNode(assetManager, "Sounds/Damtaro-Start-_freetouse.com_.wav", AudioData.DataType.Stream);
@@ -458,7 +459,7 @@ public class Stations extends SimpleApplication {
 
         quitButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
         quitButton.setText("Quit");
-        quitButton.setColor(ColorRGBA.Red);
+        quitButton.setColor(ColorRGBA.White);
         quitButton.setLocalTranslation(10, quitButton.getLineHeight() + 10, 0);  // Position the button at the bottom left corner
         guiNode.attachChild(quitButton);
 
@@ -483,13 +484,13 @@ public class Stations extends SimpleApplication {
         }, "Quit");
     }
     private void levelUp() {
-        BitmapText quitButton = new BitmapText(guiFont, false);
+        BitmapText levelUpButton = new BitmapText(guiFont, false);
 
-        quitButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
-        quitButton.setText("Level Up");
-        quitButton.setColor(ColorRGBA.Green);
-        quitButton.setLocalTranslation(settings.getWidth() - quitButton.getLineWidth() - 10, quitButton.getLineHeight() + 10, 0);  // Position the button at the bottom right corner
-        guiNode.attachChild(quitButton);
+        levelUpButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
+        levelUpButton.setText("Level Up");
+        levelUpButton.setColor(ColorRGBA.White);
+        levelUpButton.setLocalTranslation(settings.getWidth() - levelUpButton.getLineWidth() - 10, levelUpButton.getLineHeight() + 10, 0);  // Position the button at the bottom right corner
+        guiNode.attachChild(levelUpButton);
 
         inputManager.addMapping("Level up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addListener(new ActionListener() {

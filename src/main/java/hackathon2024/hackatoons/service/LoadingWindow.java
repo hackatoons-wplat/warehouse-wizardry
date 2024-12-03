@@ -17,20 +17,22 @@ public class LoadingWindow extends SimpleApplication {
     private BitmapText loadingText;
     private AudioNode audioNode;
 
+
+
     public static void main(String[] args) {
         LoadingWindow app = new LoadingWindow();
         AppSettings settings = new AppSettings(true);
         settings.setTitle("Loading Window");
         settings.setResolution(1280, 720);
         settings.setFullscreen(false);
-//        settings.setDisplayFps(false);
-//        settings.setDisplayStatView(false);
         app.setSettings(settings);
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
+        setDisplayFps(false);
+        setDisplayStatView(false);
         initLoadingScreen();
         initAudio();
         setupInput();
