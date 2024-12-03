@@ -40,15 +40,15 @@ public class LoadingWindow extends SimpleApplication {
         guiNode.detachAllChildren();
         // Load and display an image below the text
         Picture loadingImage = new Picture("Loading Image");
-        loadingImage.setImage(assetManager, "Models/Warehous.png", true);
+        loadingImage.setImage(assetManager, "Models/vanderlande.jpeg", true);
         loadingImage.setWidth(1280);  // Set the width of the image
         loadingImage.setHeight(720); // Set the height of the image
         guiNode.attachChild(loadingImage);
         loadingText = new BitmapText(guiFont, false);
         loadingText.setSize(guiFont.getCharSet().getRenderedSize() * 2);
-        loadingText.setText("Loading... Press Enter to continue");
-        loadingText.setColor(ColorRGBA.Black);
-        loadingText.setLocalTranslation(settings.getWidth() / 2 - loadingText.getLineWidth() / 2, settings.getHeight() / 2 + loadingText.getLineHeight() / 2, 0);
+        loadingText.setText("....Press Enter to be future ready....");
+        loadingText.setColor(ColorRGBA.White);
+        loadingText.setLocalTranslation(settings.getWidth() / 2 - loadingText.getLineWidth() / 2, settings.getHeight()-50  + loadingText.getLineHeight() / 2, 0);
         guiNode.attachChild(loadingText);
     }
 

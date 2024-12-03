@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
+import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -16,6 +17,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -23,6 +26,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
+import hackathon2024.hackatoons.service.Conveyor;
 import hackathon2024.hackatoons.service.LoadingWindow;
 
 import java.util.ArrayList;
@@ -48,6 +52,7 @@ public class Stations extends SimpleApplication {
     public static void main(String[] args) {
         Stations app = new Stations();
         AppSettings settings = new AppSettings(true);
+
         settings.setTitle("Warehouse Wizardry");
         settings.setSamples(8);
         settings.setResolution(1280, 720);
@@ -57,10 +62,11 @@ public class Stations extends SimpleApplication {
     }
 
     public void simpleInitApp() {
-//        initConveyorBelt();
+         initQuitButton();
 
+        levelUp();
         // Initialize the audio node
-        audioNode = new AudioNode(assetManager, "Sounds/super-mario.wav", AudioData.DataType.Stream);
+        audioNode = new AudioNode(assetManager, "Sounds/Damtaro-Start-_freetouse.com_.wav", AudioData.DataType.Stream);
         audioNode.setLooping(true);  // Loop the audio
         audioNode.setPositional(false);  // Non-positional audio
         audioNode.setVolume(0.5f);  // Set volume
@@ -92,13 +98,14 @@ public class Stations extends SimpleApplication {
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
 
+
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
         // Set up the camera
         cam.setLocation(new Vector3f(0, 8, 15));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-
+        flyCam.setEnabled(false);
         // Set up the camera
         cam.setLocation(new Vector3f(0, 12, 20));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
@@ -445,4 +452,61 @@ public class Stations extends SimpleApplication {
             }
         }).start();
     }
+
+    private void initQuitButton() {
+        BitmapText quitButton = new BitmapText(guiFont, false);
+
+        quitButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
+        quitButton.setText("Quit");
+        quitButton.setColor(ColorRGBA.Red);
+        quitButton.setLocalTranslation(10, quitButton.getLineHeight() + 10, 0);  // Position the button at the bottom left corner
+        guiNode.attachChild(quitButton);
+
+        inputManager.addMapping("Quit", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(new ActionListener() {
+            @Override
+            public void onAction(String name, boolean isPressed, float tpf) {
+                if (name.equals("Quit") && !isPressed) {
+                    Vector2f click2d = inputManager.getCursorPosition();
+                    float x = click2d.x;
+                    float y = click2d.y;
+                    float buttonX = quitButton.getLocalTranslation().x;
+                    float buttonY = quitButton.getLocalTranslation().y;
+                    float buttonWidth = quitButton.getLineWidth();
+                    float buttonHeight = quitButton.getLineHeight();
+
+                    if (x >= buttonX && x <= buttonX + buttonWidth && y >= buttonY - buttonHeight && y <= buttonY) {
+                        stop();  // Close the application
+                    }
+                }
+            }
+        }, "Quit");
+    }
+    private void levelUp() {
+        BitmapText quitButton = new BitmapText(guiFont, false);
+
+        quitButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
+        quitButton.setText("Level Up");
+        quitButton.setColor(ColorRGBA.Green);
+        quitButton.setLocalTranslation(settings.getWidth() - quitButton.getLineWidth() - 10, quitButton.getLineHeight() + 10, 0);  // Position the button at the bottom right corner
+        guiNode.attachChild(quitButton);
+
+        inputManager.addMapping("Level up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+        inputManager.addListener(new ActionListener() {
+            @Override
+            public void onAction(String name, boolean isPressed, float tpf) {
+                if (name.equals("Level up") && !isPressed) {
+                    Conveyor app = new Conveyor();
+                    AppSettings settings = new AppSettings(true);
+                    settings.setTitle("Warehouse Wizardry");
+                    settings.setResolution(1280, 720);
+                    settings.setFullscreen(false);
+                    app.setSettings(settings);
+                    audioNode.stop();
+                    app.start();
+                }
+            }
+        }, "Level up");
+    }
 }
+
