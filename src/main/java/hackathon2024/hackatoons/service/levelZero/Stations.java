@@ -45,6 +45,7 @@ public class Stations extends SimpleApplication {
         Stations app = new Stations();
         AppSettings settings = new AppSettings(true);
         settings.setTitle("Warehouse Wizardry");
+        settings.setSamples(8);
         settings.setResolution(1280, 720);
         settings.setFullscreen(false);
         app.setSettings(settings);
@@ -357,8 +358,9 @@ public class Stations extends SimpleApplication {
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(0.7f);
         title.setText("System Exit");
+        title.rotate(0,-FastMath.HALF_PI,0);
         title.setColor(ColorRGBA.White);
-        title.setLocalTranslation(2f, 3f, 17f); // Adjust the position as needed
+        title.setLocalTranslation(8f, 3f, 18f); // Adjust the position as needed
         stationNode.attachChild(title);
 
 
@@ -370,10 +372,10 @@ public class Stations extends SimpleApplication {
     private void initCarrier(AssetManager assetManager, List<Vector3f> keyframes, float speed) {
         // Load the box-small.obj model for the carrier
         Node carrierNode = new Node("Carrier");
-        Spatial carrierModel = assetManager.loadModel("Models/box-small.obj");
+        Spatial carrierModel = assetManager.loadModel("Models/box-large.obj");
 
         // Scale and position the carrier initially at the first keyframe
-        carrierModel.setLocalScale(1f);
+        carrierModel.setLocalScale(1.5f);
         if (keyframes != null && !keyframes.isEmpty()) {
             carrierNode.setLocalTranslation(keyframes.get(0));  // Set initial position to first keyframe
         } else {
@@ -415,6 +417,7 @@ public class Stations extends SimpleApplication {
                         Thread.sleep(10);  // Control movement speed (10ms step delay)
                     }
                 }
+                enqueue(() -> rootNode.detachChild(carrierNode));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
