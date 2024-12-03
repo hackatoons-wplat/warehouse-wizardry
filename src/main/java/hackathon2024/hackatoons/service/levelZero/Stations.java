@@ -2,6 +2,8 @@ package hackathon2024.hackatoons.service.levelZero;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioData;
+import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -38,7 +40,7 @@ public class Stations extends SimpleApplication {
     private boolean isBoxMoved = false;
     private List<Vector3f> keyframesList = new ArrayList<>();
     private BitmapText tooltip;
-
+    private AudioNode audioNode;
 
     private float conveyorSpeed = 2f;
 
@@ -56,6 +58,15 @@ public class Stations extends SimpleApplication {
     public void simpleInitApp() {
 //        initConveyorBelt();
 
+        // Initialize the audio node
+        audioNode = new AudioNode(assetManager, "Sounds/super-mario.wav", AudioData.DataType.Stream);
+        audioNode.setLooping(true);  // Loop the audio
+        audioNode.setPositional(false);  // Non-positional audio
+        audioNode.setVolume(0.5f);  // Set volume
+        rootNode.attachChild(audioNode);
+
+        // Play the audio
+        audioNode.play();
         keyframesList = Arrays.asList(
                 new Vector3f(0, 0.6f, 0),
                 new Vector3f(5, 0.6f, 0),
