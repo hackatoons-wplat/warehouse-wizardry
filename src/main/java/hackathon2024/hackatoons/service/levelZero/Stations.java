@@ -2,6 +2,8 @@ package hackathon2024.hackatoons.service.levelZero;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioData;
+import com.jme3.audio.AudioNode;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -37,8 +39,8 @@ public class Stations extends SimpleApplication {
     private boolean isPaused = false;
     private boolean isBoxMoved = false;
     private List<Vector3f> keyframesList = new ArrayList<>();
-
-    private int Score = 0;
+    private BitmapText tooltip;
+    private AudioNode audioNode;
 
     private float conveyorSpeed = 2f;
 
@@ -56,6 +58,15 @@ public class Stations extends SimpleApplication {
     public void simpleInitApp() {
 //        initConveyorBelt();
 
+        // Initialize the audio node
+        audioNode = new AudioNode(assetManager, "Sounds/super-mario.wav", AudioData.DataType.Stream);
+        audioNode.setLooping(true);  // Loop the audio
+        audioNode.setPositional(false);  // Non-positional audio
+        audioNode.setVolume(0.5f);  // Set volume
+        rootNode.attachChild(audioNode);
+
+        // Play the audio
+        audioNode.play();
         keyframesList = Arrays.asList(
                 new Vector3f(0, 0.6f, 0),
                 new Vector3f(5, 0.6f, 0),
@@ -385,6 +396,14 @@ public class Stations extends SimpleApplication {
         carrierNode.attachChild(carrierModel);
         rootNode.attachChild(carrierNode);
 
+        tooltip = new BitmapText(guiFont, false);
+        tooltip.setSize(.5f);
+        tooltip.setText("Click for Action");
+        tooltip.setColor(ColorRGBA.White);
+        tooltip.setLocalTranslation(7, 5, 5);  // Adjust position relative to the carrier
+        tooltip.setCullHint(Spatial.CullHint.Always);
+        rootNode.attachChild(tooltip);
+
         // Movement logic
         new Thread(() -> {
             try {
@@ -411,7 +430,9 @@ public class Stations extends SimpleApplication {
                             isPaused = true;   // Indicate that movement is paused
                             setupInput();      // Setup input listeners
 
+                            enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Never));  // Show tooltip
                             Thread.sleep(3000);
+                            enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Always));  // Hide tooltip
                             isPaused = false;
                         }
 
@@ -419,7 +440,6 @@ public class Stations extends SimpleApplication {
                     }
                 }
                 enqueue(() -> rootNode.detachChild(carrierNode));
-                Score+= 100;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
