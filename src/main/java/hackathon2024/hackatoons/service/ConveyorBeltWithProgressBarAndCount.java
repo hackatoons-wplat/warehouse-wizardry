@@ -3,6 +3,9 @@ package hackathon2024.hackatoons.service;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -11,6 +14,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 
+import javax.swing.*;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -36,6 +40,10 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
 
     private BitmapText validCarrierText;
     private BitmapText invalidCarrierText;
+    private boolean isRunning = true;
+    private Long decisionCount;
+    private Action onRClick;
+    private Action onLClick;
 
     public static void main(String[] args) {
         ConveyorBeltWithProgressBarAndCount app = new ConveyorBeltWithProgressBarAndCount();
@@ -47,6 +55,7 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
         initConveyorBelt();
         initCarriers();
         initHand();
+        initMouseInput();
         initProgressBar();
         initTextFields();
 
@@ -142,6 +151,10 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
 
     @Override
     public void simpleUpdate(float tpf) {
+        if (!isRunning) {
+            return; // Skip updates when stopped
+        }
+
         if (isPickingUp) {
             performPickupAnimation(tpf);
             return;
@@ -178,6 +191,24 @@ public class ConveyorBeltWithProgressBarAndCount extends SimpleApplication {
         float progress = carriersPassed / totalCarrierCount;
         progressBarForeground.setMesh(new Quad(progress * 400, 20));
     }
+
+    private void initMouseInput() {
+        // Map mouse buttons to actions
+        inputManager.addMapping("StopConveyor", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT)); // Right click
+        inputManager.addMapping("ResumeConveyor", new MouseButtonTrigger(MouseInput.BUTTON_LEFT)); // Left click
+
+        // Add listeners for the actions
+        inputManager.addListener(actionListener, "StopConveyor", "ResumeConveyor");
+    }
+
+    private ActionListener actionListener = (name, isPressed, tpf) -> {
+        if (name.equals("StopConveyor") && !isPressed) {
+            isRunning = false; // Stop conveyor on right click
+        }
+        if (name.equals("ResumeConveyor") && !isPressed) {
+            isRunning = true; // Resume conveyor on left click
+        }
+    };
 
     private void performPickupAnimation(float tpf) {
         if (handProgress < 1) {
