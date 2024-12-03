@@ -38,6 +38,7 @@ public class Stations extends SimpleApplication {
     private boolean isBoxMoved = false;
     private List<Vector3f> keyframesList = new ArrayList<>();
 
+    private int Score = 0;
 
     private float conveyorSpeed = 2f;
 
@@ -418,6 +419,7 @@ public class Stations extends SimpleApplication {
                     }
                 }
                 enqueue(() -> rootNode.detachChild(carrierNode));
+                Score+= 100;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
