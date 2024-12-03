@@ -3,14 +3,12 @@ package hackathon2024.hackatoons.service;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
-import com.jme3.texture.Texture;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.system.AppSettings;
@@ -20,15 +18,15 @@ import java.util.Queue;
 
 public class ConveyorHand extends SimpleApplication {
 
-    private Node conveyorBeltNode = new Node("ConveyorBelt");
-    private Node handNode = new Node("Hand");
+    private final Node conveyorBeltNode = new Node("ConveyorBelt");
+    private final Node handNode = new Node("Hand");
     private Queue<Carrier> carriers = new LinkedList<>();
     private Geometry humanHand;
     private boolean isPickingUp = false;
     private Geometry currentHeavyCarrier;
     private float handProgress = 0f;
 
-    private float conveyorSpeed = 2f;
+    private final float conveyorSpeed = 2f;
 
     public static void main(String[] args) {
         ConveyorHand app = new ConveyorHand();
@@ -113,7 +111,7 @@ public class ConveyorHand extends SimpleApplication {
 
             // Apply scale and translation if needed
             carrierGeometry.setLocalScale(2f);
-            carrierGeometry.setLocalTranslation(0, 0.01f, 0);
+            carrierGeometry.setLocalTranslation(0, 0.5f, 0);
 
             // Attach the geometry to the carrier node
             carrierNode.attachChild(carrierGeometry);
@@ -127,7 +125,7 @@ public class ConveyorHand extends SimpleApplication {
 
             // Apply scale and translation if needed
             carrierGeometry.setLocalScale(2f);
-            carrierGeometry.setLocalTranslation(8, 0.01f, 0);
+            carrierGeometry.setLocalTranslation(0f, 0.5f, 0);
 
             // Attach the geometry to the carrier node
             carrierNode.attachChild(carrierGeometry);
@@ -178,7 +176,7 @@ public class ConveyorHand extends SimpleApplication {
         rootNode.attachChild(handNode);
 
 
-        
+
     }
 
     private void addLighting() {
