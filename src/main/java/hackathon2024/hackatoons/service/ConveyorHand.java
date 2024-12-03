@@ -251,7 +251,7 @@ public class ConveyorHand extends SimpleApplication {
 
         for (int i = -5; i < numBars; i++) {
             // Load the conveyor bar model
-            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-high.obj");
+            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-stripe.obj");
 
             // Scale the model if needed (you can adjust scale)
             conveyorBarModel.setLocalScale(barSize);
@@ -276,7 +276,7 @@ public class ConveyorHand extends SimpleApplication {
 
         for (int i = -10; i < numBars; i++) {
             // Load the conveyor bar model
-            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-high.obj");
+            Node conveyorBarModel = (Node) assetManager.loadModel("Models/conveyor-bars-stripe.obj");
 
             // Scale the model if needed (you can adjust scale)
             conveyorBarModel.setLocalScale(barSize);
