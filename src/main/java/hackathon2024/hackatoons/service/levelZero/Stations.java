@@ -16,7 +16,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
@@ -46,7 +45,6 @@ public class Stations extends SimpleApplication {
     }
 
     public void simpleInitApp() {
-//        initConveyorBelt();
         initCarriers();
         initStation();
         setupInput();
@@ -55,7 +53,6 @@ public class Stations extends SimpleApplication {
         initFloor();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
-        initCarriers();
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
@@ -66,18 +63,6 @@ public class Stations extends SimpleApplication {
         // Set up the camera
         cam.setLocation(new Vector3f(0, 12, 20));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-    }
-
-    public void initConveyorBelt() {
-        // Create the conveyor belt
-        Box beltShape = new Box(10, 0.1f, 2);
-        Geometry conveyorBelt = new Geometry("ConveyorBelt", beltShape);
-        Material beltMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        beltMaterial.setColor("Color", ColorRGBA.Gray);
-        conveyorBelt.setMaterial(beltMaterial);
-        conveyorBelt.setLocalTranslation(0, 0, 0);
-        conveyorBeltNode.attachChild(conveyorBelt);
-        rootNode.attachChild(conveyorBeltNode);
     }
 
     public void initStation() {
@@ -99,7 +84,6 @@ public class Stations extends SimpleApplication {
     }
 
     public void initCarriers() {
-        // Create 20 carriers; 5th and 11th are heavy
         for (int i = 0; i < 1; i++) {
             carriers.add(createCarrier(i));
         }
@@ -129,18 +113,6 @@ public class Stations extends SimpleApplication {
         for (Carrier carrier : carriers) {
             carrier.geometry.move(conveyorSpeed * tpf, 0, 0);
         }
-
-        // Check for the heavy carrier reaching the center
-//        if (!carriers.isEmpty()) {
-//            Carrier carrier = carriers.peek();
-//            if (carrier.geometry.getLocalTranslation().x >= 0) {
-//
-//                    // Remove the carrier from the queue (normal weight)
-//                    conveyorBeltNode.detachChild(carrier.geometry);
-//                    carriers.poll();
-//
-//            }
-//        }
     }
 
     // Class to represent each carrier
@@ -305,9 +277,6 @@ public class Stations extends SimpleApplication {
 
         rootNode.attachChild(floorNode);
     }
-
-
-
 
     private void initStorage(){
 
