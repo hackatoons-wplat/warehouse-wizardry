@@ -1,8 +1,13 @@
 package hackathon2024.hackatoons.service;
-
+import com.jme3.post.Filter;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResults;
+import com.jme3.font.*;
+import java.util.Random;
 import com.jme3.font.BitmapText;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -16,24 +21,50 @@ import com.jme3.scene.Spatial;
 import com.jme3.light.AmbientLight;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
+import com.jme3.system.AppSettings;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class Conveyor extends SimpleApplication {
 
-    private static final int MAX_CARRIERS = 1000;   // Maximum number of carriers to spawn
+    private static final int MAX_CARRIERS = 10;   // Maximum number of carriers to spawn
     private int carriersSpawned = 0;              // Count of carriers spawned
     private float spawnDelay = 1.0f;              // Delay between spawning carriers in seconds
     private float timeSinceLastSpawn = 0;         // Timer to track time since last spawn
-
+    private int Score = 0;
+    private BitmapText scoreText;
     public static void main(String[] args) {
+
         Conveyor app = new Conveyor();
+        AppSettings settings = new AppSettings(true);
+        settings.setTitle("Warehouse Wizardry");
+        settings.setResolution(1280, 720);
+        settings.setFullscreen(false);
+        app.setSettings(settings);
         app.start();
     }
 
+
+    List<Vector3f> keyframes = Arrays.asList(
+            new Vector3f(0, 0.25f, 0),
+            new Vector3f(5, 0.25f, 0),
+            new Vector3f(10, 0.25f, 0),
+            new Vector3f(10, 0.25f, -10)
+            //new Vector3f(10, 0.25f, 10)
+    );
+    List<Vector3f> keyframes_exit = Arrays.asList(
+            new Vector3f(0, 0.25f, 0),
+            new Vector3f(5, 0.25f, 0),
+            new Vector3f(10, 0.25f, 0),
+            //new Vector3f(10, 0.25f, -10),
+            new Vector3f(10, 0.25f, 10)
+    );
+
     @Override
     public void simpleInitApp() {
+
         initConveyorBars(assetManager);
         initSystemExit();
         initStorage();
@@ -111,10 +142,17 @@ public class Conveyor extends SimpleApplication {
                 new Vector3f(0, 0.25f, 0),
                 new Vector3f(5, 0.25f, 0),
                 new Vector3f(10, 0.25f, 0),
-                new Vector3f(10, 0.25f, -10),
+                new Vector3f(10, 0.25f, -10)
+                //new Vector3f(10, 0.25f, 10)
+        );
+        List<Vector3f> keyframes_exit = Arrays.asList(
+                new Vector3f(0, 0.25f, 0),
+                new Vector3f(5, 0.25f, 0),
+                new Vector3f(10, 0.25f, 0),
+                //new Vector3f(10, 0.25f, -10),
                 new Vector3f(10, 0.25f, 10)
         );
-        initCarrier(assetManager, keyframes, 2f);
+        initCarrier(assetManager, keyframes_exit, 2f);
     }
 
     private void initCarrier(AssetManager assetManager, List<Vector3f> keyframes, float speed) {
@@ -141,23 +179,51 @@ public class Conveyor extends SimpleApplication {
     private void startCarrierMovement(Node carrierNode, List<Vector3f> keyframes, float speed) {
         new Thread(() -> {
             try {
-                for (int i = 0; i < keyframes.size() - 1; i++) {
-                    Vector3f start = keyframes.get(i);
-                    Vector3f end = keyframes.get(i + 1);
-                    float distance = start.distance(end);
-                    float duration = distance / speed;
-                    float step = 0.01f;
+                Random random = new Random();
+                int randomNumber = random.nextInt(2);
+                if (randomNumber == 0) {
+                    for (int i = 0; i < this.keyframes.size() - 1; i++) {
+                        Vector3f start = this.keyframes.get(i);
+                        Vector3f end = this.keyframes.get(i + 1);
+                        float distance = start.distance(end);
+                        float duration = distance / speed;
+                        float step = 0.01f;
 
-                    for (float t = 0; t <= 1; t += step / duration) {
-                        Vector3f interpolated = new Vector3f().interpolateLocal(start, end, t);
-                        enqueue(() -> carrierNode.setLocalTranslation(interpolated));
-                        Thread.sleep(10);
+                        for (float t = 0; t <= 1; t += step / duration) {
+                            Vector3f interpolated = new Vector3f().interpolateLocal(start, end, t);
+                            enqueue(() -> carrierNode.setLocalTranslation(interpolated));
+                            Thread.sleep(10);
+                        }
                     }
+                    Score+=100;
                 }
-                actionListener.onAction("Click", true, 0);
+                    else {
+
+                    Material redMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+                    redMaterial.setColor("Color", ColorRGBA.Red);  // Set red color
+                    redMaterial.setColor("GlowColor", ColorRGBA.Red);  // Optional: Add a glow effect
+
+                    // Apply the material to the spatial
+                    carrierNode.setMaterial(redMaterial);
+                        for (int i = 0; i < this.keyframes_exit.size() - 1; i++) {
+                            Vector3f start = this.keyframes_exit.get(i);
+                            Vector3f end = this.keyframes_exit.get(i + 1);
+                            float distance = start.distance(end);
+                            float duration = distance / speed;
+                            float step = 0.01f;
+
+                            for (float t = 0; t <= 1; t += step / duration) {
+                                Vector3f interpolated = new Vector3f().interpolateLocal(start, end, t);
+                                enqueue(() -> carrierNode.setLocalTranslation(interpolated));
+                                Thread.sleep(10);
+                            }
+                        }
+                    Score -= 100;
+                    }
 
                 // Detach the carrier after reaching the last keyframe
                 enqueue(() -> rootNode.detachChild(carrierNode));
+                    scoreText.setText("Score: " + Score);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -172,6 +238,14 @@ public class Conveyor extends SimpleApplication {
     }
 
     public void initConveyorBars(AssetManager assetManager) {
+        BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        scoreText = new BitmapText(font, false);
+        scoreText.setSize(20);
+        scoreText.setColor(ColorRGBA.Green);
+        scoreText.setText("Score: 0");
+        scoreText.setLocalTranslation(settings.getWidth() - 200, 50, 0);
+        guiNode.attachChild(scoreText);
+
         Node conveyorBarsNode = new Node("ConveyorBars");
         int numBars = 10;
         float barSpacing = 0f;
@@ -243,47 +317,17 @@ public class Conveyor extends SimpleApplication {
     public void setupCamera() {
         cam.setLocation(new Vector3f(0, 5, 15));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+        setDisplayFps(false);
+        setDisplayStatView(false);
         flyCam.setEnabled(true);  // Disable camera movement (for mouse clicking only)
     }
 
     // Set up input handling for mouse clicks
     private void setupInput() {
-        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(actionListener, "Click");
     }
 
     // ActionListener for mouse click events
-    private ActionListener actionListener = new ActionListener() {
-        public void onAction(String name, boolean isPressed, float tpf) {
 
-            System.out.println("Carrier Should be outside");
-            if (name.equals("Click") && isPressed) {
-
-                System.out.println("Carrier Should be in if ");
-                // Raycast to detect what the mouse is clicking on
-                CollisionResults results = new CollisionResults();
-                Vector2f mouseCoordinates = inputManager.getCursorPosition();
-                Vector3f worldMouseCoordinates = cam.getWorldCoordinates(mouseCoordinates, 0f);
-                Vector3f worldMouseDirection = cam.getWorldCoordinates(mouseCoordinates, 1f).subtractLocal(worldMouseCoordinates);
-
-                rootNode.collideWith(new Ray(worldMouseCoordinates, worldMouseDirection), results);
-
-                if (results.size() > 0) {
-                    System.out.println("Hey I am inside the boxxxxxxxxx");
-                    // Get the first object hit and check if it's a carrier
-                    Spatial hitSpatial = results.getClosestCollision().getGeometry();
-                    System.out.println(hitSpatial.getName());
-//                    if (hitSpatial != null && hitSpatial.getUserData("carrierNode") != null) {
-                    if (hitSpatial != null && hitSpatial.getName() == "box-small" && hitSpatial.getUserData("carrierNode1") != null) {
-
-                        // Detach the carrier if clicked
-                        Node carrierNode = (Node) hitSpatial.getUserData("carrierNode");
-                        onClickCarrier(carrierNode);
-                    }
-                }
-            }
-        }
-    };
 
     private void initStorage(){
 
@@ -297,9 +341,9 @@ public class Conveyor extends SimpleApplication {
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(1f);
-        title.setText("Storage");
+        title.setText("StockRoom");
         title.setColor(ColorRGBA.White);
-        title.setLocalTranslation(8f, 5f, -21f); // Adjust the position as needed
+        title.setLocalTranslation(10f, 3f, -10); // Adjust the position as needed
         conveyorBeltNode.attachChild(title);
 
 
@@ -311,20 +355,20 @@ public class Conveyor extends SimpleApplication {
 
         Node stationNode = new Node("Station");
         Node conveyorBeltNode = new Node("ConveyorBelt");
-        Node systemExit = (Node) assetManager.loadModel("Models/structure-doorway-wide.obj");
+        Node systemExit = (Node) assetManager.loadModel("Models/cover-window.obj");
+        systemExit.rotate(0, -FastMath.HALF_PI, 0);
         systemExit.setLocalTranslation(10f, 0f, 10f);
         systemExit.scale(1f);
 
 
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
-        title.setSize(0.7f);
-        title.setText("System Exit");
+        title.setSize(1f);
+        title.setText("ExitDock");
         title.setColor(ColorRGBA.White);
-        title.setLocalTranslation(2f, 3f, 17f); // Adjust the position as needed
-        stationNode.attachChild(title);
-
-
+        title.setLocalTranslation(9f, 2f, 10); // Adjust the position as needed
+        title.rotate(0,-FastMath.HALF_PI,0);
+        conveyorBeltNode.attachChild(title);
         conveyorBeltNode.attachChild(systemExit);
         rootNode.attachChild(conveyorBeltNode);
     }
