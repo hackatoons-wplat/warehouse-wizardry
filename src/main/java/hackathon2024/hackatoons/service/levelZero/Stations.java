@@ -2,8 +2,10 @@ package hackathon2024.hackatoons.service.levelZero;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
+import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -27,7 +29,9 @@ public class Stations extends SimpleApplication {
     private Node conveyorBeltNode = new Node("ConveyorBelt");
     private Node stationNode = new Node("Station");
     private Queue<Carrier> carriers = new LinkedList<>();
-    private int rotation = 0;
+    private float verticalPoint = 0;
+    private boolean isPaused = false;
+    private boolean isBoxMoved = false;
 
     private float conveyorSpeed = 2f;
 
@@ -42,7 +46,7 @@ public class Stations extends SimpleApplication {
     }
 
     public void simpleInitApp() {
-        initConveyorBelt();
+//        initConveyorBelt();
         initCarriers();
         initStation();
         setupInput();
@@ -77,17 +81,16 @@ public class Stations extends SimpleApplication {
     }
 
     public void initStation() {
-        Node stationNode = new Node("Station");
         Node station = (Node) assetManager.loadModel("Models/scanner-high.obj"); // Add your .glb file path
         station.setLocalTranslation(-8f, 0, 0); // Position the station at the start of the conveyor belt
         station.scale(2.5f);
 
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
-        title.setSize(1f);
+        title.setSize(0.8f);
         title.setText("Goods Intake");
         title.setColor(ColorRGBA.White);
-        title.setLocalTranslation(-15f, -5f, -5f); // Adjust the position as needed
+        title.setLocalTranslation(-9f, 5f, 0); // Adjust the position as needed
         stationNode.attachChild(title);
 
 
@@ -120,22 +123,24 @@ public class Stations extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {
 
+        verticalPoint = tpf;
+
         // Move all carriers on the conveyor belt
         for (Carrier carrier : carriers) {
             carrier.geometry.move(conveyorSpeed * tpf, 0, 0);
         }
 
         // Check for the heavy carrier reaching the center
-        if (!carriers.isEmpty()) {
-            Carrier carrier = carriers.peek();
-            if (carrier.geometry.getLocalTranslation().x >= 0) {
-
-                    // Remove the carrier from the queue (normal weight)
-                    conveyorBeltNode.detachChild(carrier.geometry);
-                    carriers.poll();
-
-            }
-        }
+//        if (!carriers.isEmpty()) {
+//            Carrier carrier = carriers.peek();
+//            if (carrier.geometry.getLocalTranslation().x >= 0) {
+//
+//                    // Remove the carrier from the queue (normal weight)
+//                    conveyorBeltNode.detachChild(carrier.geometry);
+//                    carriers.poll();
+//
+//            }
+//        }
     }
 
     // Class to represent each carrier
@@ -148,30 +153,43 @@ public class Stations extends SimpleApplication {
     }
 
     private void setupInput() {
-        inputManager.addMapping("RightClick", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         inputManager.addMapping("LeftClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(actionListener, "RightClick", "LeftClick");
+        inputManager.addMapping("RightClick", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+        inputManager.addMapping("Pause", new KeyTrigger(KeyInput.KEY_P));
+        inputManager.addListener(actionListener, "LeftClick", "RightClick", "Pause");
     }
 
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (!isPressed && rotation == 0) {
-                if (name.equals("RightClick")) {
-                    moveCarrier(0, -5, 0); // Move down
-                } else if (name.equals("LeftClick")) {
-                    moveCarrier(0, 2, 0); // Move up
+            if (!isBoxMoved) {
+                if (name.equals("LeftClick") && !isPressed) {
+                    moveUpward(tpf);
+                    isBoxMoved = true;
+                } else if (name.equals("RightClick") && !isPressed) {
+                    moveDownward();
+                    isBoxMoved = true;
                 }
             }
-            ++rotation;
+            if (name.equals("Pause") && !isPressed) {
+                isPaused = !isPaused;
+            }
         }
     };
 
-    public void moveCarrier(float x, float y, float z) {
-        // Move the first carrier in the queue
-        if (!carriers.isEmpty()) {
+    private void moveUpward(float tpf) {
+        if (!isPaused && !carriers.isEmpty()) {
+            // Define the action to move upward
             Carrier carrier = carriers.peek();
-            carrier.geometry.move(x, y, z);
+            carrier.geometry.move(0, 5f, 0);
+        }
+    }
+
+    private void moveDownward() {
+        if (!isPaused && !carriers.isEmpty()) {
+            // Define the action to move downward
+            Carrier carrier = carriers.peek();
+            carrier.geometry.move(0, -5, 0);
         }
     }
 
@@ -293,24 +311,18 @@ public class Stations extends SimpleApplication {
 
     private void initStorage(){
 
-        Node storageNode = new Node("Storage");
         Node storage = (Node) assetManager.loadModel("Models/cover-stripe-window.obj"); // Add your .glb file path
 
-        //Spatial storage =  assetManager.loadModel("Models/cover-stripe-window.obj"); // Add your .glb file path
         storage.setLocalTranslation(9.6f, 1f, -19f); // Position the station at the start of the conveyor belt
         storage.rotate(0, FastMath.HALF_PI, 0);
         storage.scale(2f);
-        // Create and apply saffron material
-       // Material saffronMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        //saffronMaterial.setColor("Color", new ColorRGBA(1.0f, 0.6f, 0.2f, 1.0f)); // Saffron color
-        //storage.setMaterial(saffronMaterial);
 
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(1f);
-        title.setText("Goods Intake");
+        title.setText("Storage");
         title.setColor(ColorRGBA.White);
-        title.setLocalTranslation(-15f, -5f, -5f); // Adjust the position as needed
+        title.setLocalTranslation(8f, 5f, -21f); // Adjust the position as needed
         conveyorBeltNode.attachChild(title);
 
 
@@ -319,21 +331,18 @@ public class Stations extends SimpleApplication {
     }
 
     private void initSystemExit(){
-        Node systemExitNode = new Node("SystemExit");
-        Node systemExit = (Node) assetManager.loadModel("Models/structure-doorway-wide.obj"); // Add your .glb file path
-//        Spatial systemExit = assetManager.loadModel("Models/structure-doorway-wide.obj"); // Add your .glb file path
-        systemExit.setLocalTranslation(9.6f, 0f, 18f); // Position the station at the start of the conveyor belt
-//        systemExit.rotate(0, FastMath.HALF_PI, 0);
+        Node systemExit = (Node) assetManager.loadModel("Models/structure-doorway-wide.obj");
+        systemExit.setLocalTranslation(9.6f, 0f, 18f);
         systemExit.scale(1.5f);
 
 
         // Add title "Goods Intake" above the station
-//        BitmapText title = new BitmapText(guiFont, false);
-//        title.setSize(1f);
-//        title.setText("Goods Intake");
-//        title.setColor(ColorRGBA.White);
-//        title.setLocalTranslation(-15f, -5f, -5f); // Adjust the position as needed
-//        stationNode.attachChild(title);
+        BitmapText title = new BitmapText(guiFont, false);
+        title.setSize(0.7f);
+        title.setText("System Exit");
+        title.setColor(ColorRGBA.White);
+        title.setLocalTranslation(2f, 3f, 17f); // Adjust the position as needed
+        stationNode.attachChild(title);
 
 
         conveyorBeltNode.attachChild(systemExit);
