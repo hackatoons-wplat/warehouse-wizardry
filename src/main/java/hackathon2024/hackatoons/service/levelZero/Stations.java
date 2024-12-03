@@ -1,6 +1,7 @@
 package hackathon2024.hackatoons.service.levelZero;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -16,11 +17,15 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Stations extends SimpleApplication {
@@ -31,6 +36,8 @@ public class Stations extends SimpleApplication {
     private float verticalPoint = 0;
     private boolean isPaused = false;
     private boolean isBoxMoved = false;
+    private List<Vector3f> keyframesList = new ArrayList<>();
+
 
     private float conveyorSpeed = 2f;
 
@@ -45,14 +52,33 @@ public class Stations extends SimpleApplication {
     }
 
     public void simpleInitApp() {
-        initCarriers();
+//        initConveyorBelt();
+
+        keyframesList = Arrays.asList(
+                new Vector3f(0, 0.6f, 0),
+                new Vector3f(5, 0.6f, 0),
+                new Vector3f(5, 0.6f, 0),
+                new Vector3f(10, 0.6f, 0),
+                new Vector3f(10, 0.6f, 0),
+                new Vector3f(10, 0.6f, 5),
+                new Vector3f(10, 0.6f, 10),
+                new Vector3f(10, 0.6f, 15),
+                new Vector3f(10, 0.6f, 20)
+
+        );
+
+        float speed = 2f;  // Carrier movement speed
+
+        initCarrier(assetManager, keyframesList, speed);
+//        initCarriers();
         initStation();
-        setupInput();
+
         initSystemExit();
         initStorage();
         initFloor();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
+//        initCarriers();
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
@@ -84,7 +110,8 @@ public class Stations extends SimpleApplication {
     }
 
     public void initCarriers() {
-        for (int i = 0; i < 1; i++) {
+        // Create 20 carriers; 5th and 11th are heavy
+        for (int i = 0; i < 10; i++) {
             carriers.add(createCarrier(i));
         }
     }
@@ -134,35 +161,50 @@ public class Stations extends SimpleApplication {
     private final ActionListener actionListener = new ActionListener() {
         @Override
         public void onAction(String name, boolean isPressed, float tpf) {
-            if (!isBoxMoved) {
-                if (name.equals("LeftClick") && !isPressed) {
-                    moveUpward(tpf);
-                    isBoxMoved = true;
-                } else if (name.equals("RightClick") && !isPressed) {
-                    moveDownward();
-                    isBoxMoved = true;
+            if (!isPressed) { // Trigger action only on key/button release
+                if (!isBoxMoved) {
+                    if (name.equals("LeftClick")) {
+                        moveUpward(tpf); // Move the carrier upward
+                        synchronized (pauseLock) {
+                            isBoxMoved = true; // Mark as moved
+                            pauseLock.notify(); // Resume the thread
+                        }
+                    } else if (name.equals("RightClick")) {
+                        moveDownward(); // Move the carrier downward
+                        synchronized (pauseLock) {
+                            isBoxMoved = true; // Mark as moved
+                            pauseLock.notify(); // Resume the thread
+                        }
+                    }
                 }
-            }
-            if (name.equals("Pause") && !isPressed) {
-                isPaused = !isPaused;
+
+                // Toggle pause state for the carrier
+                if (name.equals("Pause")) {
+                    synchronized (pauseLock) {
+                        isPaused = !isPaused; // Toggle paused state
+                        if (!isPaused) {
+                            pauseLock.notify(); // Resume the thread if unpaused
+                        }
+                    }
+                }
             }
         }
     };
 
     private void moveUpward(float tpf) {
-        if (!isPaused && !carriers.isEmpty()) {
             // Define the action to move upward
-            Carrier carrier = carriers.peek();
-            carrier.geometry.move(0, 5f, 0);
-        }
+            keyframesList.set(4, new Vector3f(10, 0.6f, -5));
+            keyframesList.set(5, new Vector3f(10, 0.6f, -10));
+            keyframesList.set(6, new Vector3f(10, 0.6f, -15));
+            keyframesList.set(7, new Vector3f(10, 0.6f, -20));
+            keyframesList.set(8, new Vector3f(10, 0.6f, -22));
     }
 
     private void moveDownward() {
-        if (!isPaused && !carriers.isEmpty()) {
-            // Define the action to move downward
-            Carrier carrier = carriers.peek();
-            carrier.geometry.move(0, -5, 0);
-        }
+            keyframesList.set(4, new Vector3f(10, 0.6f, 5));
+            keyframesList.set(5, new Vector3f(10, 0.6f, 10));
+            keyframesList.set(6, new Vector3f(10, 0.6f, 15));
+            keyframesList.set(7, new Vector3f(10, 0.6f, 20));
     }
 
     private void createHorizontalConveyorBelt() {
@@ -175,6 +217,12 @@ public class Stations extends SimpleApplication {
         beltMaterial.setTexture("ColorMap", texture);
         conveyorBelt.setMaterial(beltMaterial);
         conveyorBelt.setLocalTranslation(0, 0, 0);
+        BitmapText title = new BitmapText(guiFont, false);
+        title.setSize(0.8f);
+        title.setText("Conveyor Belt");
+        title.setColor(ColorRGBA.White);
+        title.setLocalTranslation(-2f, 1f, -3f);
+        conveyorBeltNode.attachChild(title);
         conveyorBeltNode.attachChild(conveyorBelt);
         rootNode.attachChild(conveyorBeltNode);
     }
@@ -318,4 +366,58 @@ public class Stations extends SimpleApplication {
         rootNode.attachChild(conveyorBeltNode);
     }
 
+    private final Object pauseLock = new Object();
+    private void initCarrier(AssetManager assetManager, List<Vector3f> keyframes, float speed) {
+        // Load the box-small.obj model for the carrier
+        Node carrierNode = new Node("Carrier");
+        Spatial carrierModel = assetManager.loadModel("Models/box-small.obj");
+
+        // Scale and position the carrier initially at the first keyframe
+        carrierModel.setLocalScale(1f);
+        if (keyframes != null && !keyframes.isEmpty()) {
+            carrierNode.setLocalTranslation(keyframes.get(0));  // Set initial position to first keyframe
+        } else {
+            carrierNode.setLocalTranslation(Vector3f.ZERO);  // Default position if no keyframes
+        }
+        carrierNode.attachChild(carrierModel);
+        rootNode.attachChild(carrierNode);
+
+        // Movement logic
+        new Thread(() -> {
+            try {
+                for (int i = 0; i < keyframes.size() - 1; i++) {
+                    Vector3f start = keyframes.get(i);
+                    Vector3f end = keyframes.get(i + 1);
+
+                    float distance = start.distance(end);
+                    float duration = distance / speed;
+                    float step = 0.01f;  // Smaller step for smoother interpolation
+
+                    for (float t = 0; t <= 1; t += step / duration) {
+
+                        Vector3f interpolated = new Vector3f()
+                                .set(start.x, start.y, start.z)
+                                .interpolateLocal(new Vector3f(end.x, start.y, end.z), t);
+
+                        // Safely update the carrier position on the main rendering thread
+                        enqueue(() -> carrierNode.setLocalTranslation(interpolated));
+
+                        // Pause at specific condition
+                        if (interpolated.x == 10f && interpolated.y == 0.6f && interpolated.z == 0f) {
+                            isBoxMoved = false; // Enable RightClick and LeftClick functionality
+                            isPaused = true;   // Indicate that movement is paused
+                            setupInput();      // Setup input listeners
+
+                            Thread.sleep(3000);
+                            isPaused = false;
+                        }
+
+                        Thread.sleep(10);  // Control movement speed (10ms step delay)
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
 }
