@@ -65,7 +65,14 @@ public class FinalGame extends SimpleApplication {
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
         setDisplayFps(false);
         setDisplayStatView(false);
-
+        BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
+        scoreText = new BitmapText(font, false);
+        scoreText.setSize(20);
+        scoreText.setColor(ColorRGBA.Green);
+        scoreText.setText("Score: 0");
+        scoreText.setLocalTranslation(1080, 50, 0);
+        BitmapText title = new BitmapText(font, false);
+        guiNode.attachChild(scoreText);
         exitDock();
         floor();
         upBar(assetManager);
@@ -75,8 +82,8 @@ public class FinalGame extends SimpleApplication {
         addAmbientLighting();
 
         // Initialize and spawn boxes
-        BoxManager boxManager = new BoxManager(assetManager, rootNode, accepted, rejected);
-        boxManager.spawnAndAnimateBoxes(10);
+        BoxManager boxManager = new BoxManager(assetManager, rootNode, accepted, rejected, scoreText);
+        boxManager.spawnAndAnimateBoxes(100);
     }
 
     public void addAmbientLighting() {
@@ -149,13 +156,6 @@ public class FinalGame extends SimpleApplication {
     }
 
     public void baseBar(AssetManager assetManager) {
-        BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
-        scoreText = new BitmapText(font, false);
-        scoreText.setSize(20);
-        scoreText.setColor(ColorRGBA.Green);
-        scoreText.setText("Score: 0");
-        scoreText.setLocalTranslation(settings.getWidth() - 200, 50, 0);
-        guiNode.attachChild(scoreText);
 
         Node conveyorBarsNode = new Node("ConveyorBars");
         int numBars = 10;

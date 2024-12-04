@@ -1,5 +1,6 @@
 package hackathon2024.hackatoons.service;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.cinematic.MotionPathListener;
 import com.jme3.math.Quaternion;
@@ -10,10 +11,13 @@ import com.jme3.cinematic.events.MotionEvent;
 import com.jme3.math.FastMath;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
+import com.jme3.system.AppSettings;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import com.jme3.math.ColorRGBA;
+
 
 public class BoxManager {
 
@@ -30,13 +34,17 @@ public class BoxManager {
             "Models/box-long.obj"
     );
 
+
     private final List<Vector3f> accepted;
     private final List<Vector3f> rejected;
 
     private boolean isCooldown = false; // Flag for cooldown
 
-    public BoxManager(AssetManager assetManager, Node rootNode, List<Vector3f> accepted, List<Vector3f> rejected) {
+
+
+    public BoxManager(AssetManager assetManager, Node rootNode, List<Vector3f> accepted, List<Vector3f> rejected, BitmapText scoreText) {
         this.assetManager = assetManager;
+        this.scoreText = scoreText;
         this.rootNode = rootNode;
         this.accepted = accepted;
         this.rejected = rejected;
@@ -58,6 +66,10 @@ public class BoxManager {
                 // Randomly choose the box model and path based on size
                 String boxModel = boxModels.get(random.nextInt(boxModels.size()));
                 List<Vector3f> path = (boxModel.contains("small")) ? accepted : rejected;
+                if (path == accepted) {
+                    score += 100;
+                    scoreText.setText("Score: " + score);
+                }
                 System.out.println("Spawning box: " + boxModel);
                 spawnAndAnimateBox(path, boxModel);
 
@@ -87,11 +99,13 @@ public class BoxManager {
         motionPath.addWayPoint(path.get(0)); // Starting point (0, 0.25, 0)
         motionPath.addWayPoint(new Vector3f(5, 0.25f, 0)); // Intermediate point (5, 0.25, 0)
         motionPath.addWayPoint(new Vector3f(10, 0.25f, 0)); // Stop point (10, 0.25, 0)
-
+        // Set the curve tension
         // Randomly choose the final destination
         Vector3f finalDestination = (path == rejected) ? new Vector3f(10, 0.25f, 10) : new Vector3f(10, 0.25f, -10);
-        motionPath.addWayPoint(finalDestination); // Final destination
 
+
+        motionPath.addWayPoint(finalDestination); // Final destination
+        motionPath.setCurveTension(0f);
         // Create a MotionEvent to move the box along the path
         MotionEvent motionEvent = new MotionEvent(boxNode, motionPath);
         motionEvent.setSpeed(1f); // Slower speed for less fluidity
