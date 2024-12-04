@@ -4,6 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
+import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -41,7 +42,8 @@ public class Stations extends SimpleApplication {
     private List<Vector3f> keyframesList = new ArrayList<>();
     private BitmapText tooltip;
     private AudioNode audioNode;
-
+    private BitmapText scoreText;
+    private int score = 100;
     private float conveyorSpeed = 2f;
 
     public static void main(String[] args) {
@@ -69,6 +71,7 @@ public class Stations extends SimpleApplication {
         setDisplayStatView(false);
         // Play the audio
         audioNode.play();
+        BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
         keyframesList = Arrays.asList(
                 new Vector3f(0, 0.6f, 0),
                 new Vector3f(5, 0.6f, 0),
@@ -105,6 +108,12 @@ public class Stations extends SimpleApplication {
         // Set up the camera
         cam.setLocation(new Vector3f(0, 12, 20));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+
+        scoreText = new BitmapText(guiFont, false);
+        scoreText.setSize(20);
+        scoreText.setColor(ColorRGBA.Green);
+        scoreText.setLocalTranslation(1080, 50, 0);
+        setScrore(100, scoreText);
     }
 
     public void initStation() {
@@ -181,12 +190,16 @@ public class Stations extends SimpleApplication {
                 if (!isBoxMoved) {
                     if (name.equals("LeftClick")) {
                         moveUpward(tpf); // Move the carrier upward
+
                         synchronized (pauseLock) {
                             isBoxMoved = true; // Mark as moved
                             pauseLock.notify(); // Resume the thread
                         }
                     } else if (name.equals("RightClick")) {
                         moveDownward(); // Move the carrier downward
+
+
+
                         synchronized (pauseLock) {
                             isBoxMoved = true; // Mark as moved
                             pauseLock.notify(); // Resume the thread
@@ -208,15 +221,18 @@ public class Stations extends SimpleApplication {
     };
 
     private void moveUpward(float tpf) {
+
             // Define the action to move upward
             keyframesList.set(4, new Vector3f(10, 0.6f, -5));
             keyframesList.set(5, new Vector3f(10, 0.6f, -10));
             keyframesList.set(6, new Vector3f(10, 0.6f, -15));
             keyframesList.set(7, new Vector3f(10, 0.6f, -20));
             keyframesList.set(8, new Vector3f(10, 0.6f, -22));
+
     }
 
     private void moveDownward() {
+
             keyframesList.set(4, new Vector3f(10, 0.6f, 5));
             keyframesList.set(5, new Vector3f(10, 0.6f, 10));
             keyframesList.set(6, new Vector3f(10, 0.6f, 15));
@@ -478,14 +494,31 @@ public class Stations extends SimpleApplication {
                             enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Always));  // Hide tooltip
                             isPaused = false;
                         }
+                        if (interpolated.x == 10f && interpolated.y == 0.6f && interpolated.z == -20f) {
+                            score += 100;
+                            setScrore(score, scoreText);
+                        }
+                        else if (interpolated.x == 10f && interpolated.y == 0.6f && interpolated.z == 20f) {
+                            score -= 50;
+                            setScrore(score, scoreText);
+                        }
+
 
                         Thread.sleep(10);  // Control movement speed (10ms step delay)
                     }
                 }
+
                 enqueue(() -> rootNode.detachChild(carrierNode));
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }).start();
+    }
+
+    private void setScrore(int score, BitmapText scoreText) {
+        scoreText.setText("Score: " + score);
+        guiNode.attachChild(scoreText);
     }
 }
