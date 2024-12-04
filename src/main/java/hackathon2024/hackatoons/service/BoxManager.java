@@ -50,9 +50,11 @@ public class BoxManager {
                     continue;
                 }
 
-                boolean isAccepted = random.nextBoolean(); // Randomly choose path
-                List<Vector3f> path = isAccepted ? accepted : rejected;
-                spawnAndAnimateBox(path);
+                // Randomly choose the box model and path based on size
+                String boxModel = boxModels.get(random.nextInt(boxModels.size()));
+                List<Vector3f> path = (boxModel.contains("small")) ? accepted : rejected;
+                System.out.println("Spawning box: " + boxModel);
+                spawnAndAnimateBox(path, boxModel);
 
                 // Introduce a delay of 1 second (1000 milliseconds) before spawning the next box
                 try {
@@ -64,46 +66,43 @@ public class BoxManager {
         }).start();
     }
 
-    private void spawnAndAnimateBox(List<Vector3f> path) {
-        String boxModel = boxModels.get(random.nextInt(boxModels.size())); // Random box model
-        Node boxNode = (Node) assetManager.loadModel(boxModel);           // Load box model
+    private void spawnAndAnimateBox(List<Vector3f> path, String boxModel) {
+        Node boxNode = (Node) assetManager.loadModel(boxModel);  // Load box model
 
-        boxNode.setLocalScale(0.6f + random.nextFloat() * 0.2f); // Reduce random size to make it less fluid
-        boxNode.setLocalTranslation(path.get(0)); // Start at the first position
+        boxNode.setLocalScale(0.6f + random.nextFloat() * 0.2f); // Set a random scale for the box
+        boxNode.setLocalTranslation(path.get(0)); // Set the starting position
 
-        // Add box to the scene
+        // Add the box to the scene
         rootNode.attachChild(boxNode);
 
         // Create a MotionPath for the box
         MotionPath motionPath = new MotionPath();
 
-        // Add straight waypoints (positions) from the path list
-        // Use the existing path positions, but avoid smoothing
-        motionPath.addWayPoint(path.get(0));
-        for (int i = 1; i < path.size(); i++) {
-            Vector3f current = path.get(i);
-            motionPath.addWayPoint(current);
-        }
+        // Add waypoints (positions) to the motion path
+        motionPath.addWayPoint(path.get(0)); // Starting point (0, 0.25, 0)
+        motionPath.addWayPoint(new Vector3f(5, 0.25f, 0)); // Intermediate point (5, 0.25, 0)
+        motionPath.addWayPoint(new Vector3f(10, 0.25f, 0)); // Stop point (10, 0.25, 0)
 
-        // Add the stop at (10, 0.25, 0) for 3 seconds
-        motionPath.addWayPoint(new Vector3f(10, 0.25f, 0)); // Keyframe where the box will stop
-        motionPath.addWayPoint(path.get(path.size() - 1));  // Add the final destination
+        // Randomly choose the final destination
+        Vector3f finalDestination = (path == rejected) ? new Vector3f(10, 0.25f, 10) : new Vector3f(10, 0.25f, -10);
+        motionPath.addWayPoint(finalDestination); // Final destination
 
         // Create a MotionEvent to move the box along the path
         MotionEvent motionEvent = new MotionEvent(boxNode, motionPath);
-        motionEvent.setSpeed(1f); // Slower speed for reduced fluidity
-        motionEvent.setDirectionType(MotionEvent.Direction.Path); // Avoid rotation while turning
+        motionEvent.setSpeed(1f); // Slower speed for less fluidity
+        motionEvent.setDirectionType(MotionEvent.Direction.Path); // Avoid rotation while moving
 
-        // Set a listener to remove the box once the animation ends
+        // Set a listener to manage the pause and remove the box once the animation ends
         motionPath.addListener(new MotionPathListener() {
             @Override
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
-                if (wayPointIndex == motionPath.getNbWayPoints() - 1) {
-                    rootNode.detachChild(boxNode); // Remove the box once it reaches the end
-                    resetCooldown(); // Reset cooldown after box reaches the end
-                } else if (wayPointIndex == 1) {
-                    // This is the stop point at (10, 0.25, 0)
-                    triggerCooldown(); // Start cooldown after the box stops
+                if (wayPointIndex == 2) {
+                    // At the (10, 0.25, 0) point, stop the box for 3 seconds
+                    triggerCooldown(); // Start cooldown after the stop
+                } else if (wayPointIndex == motionPath.getNbWayPoints() - 1) {
+                    // After the final destination, remove the box
+                    rootNode.detachChild(boxNode);
+                    resetCooldown(); // Reset cooldown after the box reaches the final destination
                 }
             }
         });
@@ -117,11 +116,11 @@ public class BoxManager {
         isCooldown = true;
         new Thread(() -> {
             try {
-                Thread.sleep(3000); // Wait for 3 seconds (stop at (10, 0.25, 0))
+                Thread.sleep(6000); // Wait for 3 seconds (stop at (10, 0.25, 0))
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            isCooldown = false; // Reset cooldown
+            isCooldown = false; // Reset cooldown after 3 seconds
         }).start();
     }
 
