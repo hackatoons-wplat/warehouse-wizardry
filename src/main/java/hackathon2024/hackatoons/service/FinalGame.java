@@ -75,6 +75,7 @@ public class FinalGame extends SimpleApplication {
         scoreText.setLocalTranslation(1080, 50, 0);
         BitmapText title = new BitmapText(font, false);
         guiNode.attachChild(scoreText);
+        intake();
         exitDock();
         floor();
         upBar(assetManager);
@@ -146,6 +147,13 @@ public class FinalGame extends SimpleApplication {
             conveyorBarModel.setLocalTranslation(10, 0, i - (numBars * barSpacing / 2));
             conveyorBarsNodeVertical.attachChild(conveyorBarModel);
         }
+        BitmapText title = new BitmapText(guiFont, false);
+        title.setSize(0.7f);
+        title.setText("Transport Belt");
+        title.setColor(ColorRGBA.White);
+        title.rotate(0,-FastMath.HALF_PI,0);
+        title.setLocalTranslation(9f, 0.6f, 5f); // Adjust the position
+        conveyorBeltNode.attachChild(title);
 
         rootNode.attachChild(conveyorBarsNodeVertical);
     }
@@ -172,13 +180,32 @@ public class FinalGame extends SimpleApplication {
 
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(1f);
-        title.setText("ExitDock");
+        title.setText("Exit Dock");
         title.setColor(ColorRGBA.White);
+        title.rotate(0, -FastMath.HALF_PI, 0);
         title.setLocalTranslation(9f, 2f, 10); // Adjust the position
         conveyorBeltNode.attachChild(title);
         conveyorBeltNode.attachChild(systemExit);
         rootNode.attachChild(conveyorBeltNode);
     }
+
+    private void intake() {
+        Node conveyorBeltNodePrivate = new Node("ConveyorBeltPrivate");
+        Node systemExit = (Node) assetManager.loadModel("Models/cover-stripe.obj");
+        systemExit.rotate(0, 0, 0);
+        systemExit.setLocalTranslation(-1f, 0f, 0f);
+        systemExit.scale(1f);
+
+        BitmapText title = new BitmapText(guiFont, false);
+        title.setSize(1f);
+        title.setText("Receiving Dock");
+        title.setColor(ColorRGBA.White);
+        title.setLocalTranslation(-3f, 4f, -1); // Adjust the position
+        conveyorBeltNodePrivate.attachChild(title);
+        conveyorBeltNodePrivate.attachChild(systemExit);
+        rootNode.attachChild(conveyorBeltNodePrivate);
+    }
+
 
     private void storeDock() {
         Node conveyorBeltNode = new Node("ConveyorBelt");
