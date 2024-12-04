@@ -4,7 +4,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioData;
 import com.jme3.audio.AudioNode;
-import com.jme3.collision.CollisionResults;
+import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -17,8 +17,6 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -26,8 +24,6 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
-import hackathon2024.hackatoons.service.Conveyor;
-import hackathon2024.hackatoons.service.LoadingWindow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,15 +42,16 @@ public class Stations extends SimpleApplication {
     private List<Vector3f> keyframesList = new ArrayList<>();
     private BitmapText tooltip;
     private AudioNode audioNode;
-
+    private BitmapText scoreText;
+    private int score = 100;
     private float conveyorSpeed = 2f;
 
     public static void main(String[] args) {
         Stations app = new Stations();
         AppSettings settings = new AppSettings(true);
-
         settings.setTitle("Warehouse Wizardry");
         settings.setSamples(8);
+
         settings.setResolution(1280, 720);
         settings.setFullscreen(false);
         app.setSettings(settings);
@@ -62,19 +59,19 @@ public class Stations extends SimpleApplication {
     }
 
     public void simpleInitApp() {
-         initQuitButton();
-        setDisplayFps(false);
-        setDisplayStatView(false);
-        levelUp();
+//        initConveyorBelt();
+
         // Initialize the audio node
-        audioNode = new AudioNode(assetManager, "Sounds/Damtaro-Start-_freetouse.com_.wav", AudioData.DataType.Stream);
+        audioNode = new AudioNode(assetManager, "Sounds/super-mario.wav", AudioData.DataType.Stream);
         audioNode.setLooping(true);  // Loop the audio
         audioNode.setPositional(false);  // Non-positional audio
         audioNode.setVolume(0.5f);  // Set volume
         rootNode.attachChild(audioNode);
-
+        setDisplayFps(false);
+        setDisplayStatView(false);
         // Play the audio
         audioNode.play();
+        BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
         keyframesList = Arrays.asList(
                 new Vector3f(0, 0.6f, 0),
                 new Vector3f(5, 0.6f, 0),
@@ -91,25 +88,32 @@ public class Stations extends SimpleApplication {
         float speed = 2f;  // Carrier movement speed
 
         initCarrier(assetManager, keyframesList, speed);
+//        initCarriers();
         initStation();
 
         initSystemExit();
         initStorage();
+        initStorageBoxes();
         initFloor();
         createHorizontalConveyorBelt();
         createVerticalConveyorBelt();
-
-
+//        initCarriers();
         addLighting();  // Add lighting to the scene
         initConveyorBarsHorizontal(); // Initialize the conveyor bars array
         initConveyorBarsVertical(); // Initialize the conveyor bars array
         // Set up the camera
         cam.setLocation(new Vector3f(0, 8, 15));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
-        flyCam.setEnabled(false);
+
         // Set up the camera
         cam.setLocation(new Vector3f(0, 12, 20));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);
+
+        scoreText = new BitmapText(guiFont, false);
+        scoreText.setSize(20);
+        scoreText.setColor(ColorRGBA.Green);
+        scoreText.setLocalTranslation(1080, 50, 0);
+        setScrore(100, scoreText);
     }
 
     public void initStation() {
@@ -186,12 +190,16 @@ public class Stations extends SimpleApplication {
                 if (!isBoxMoved) {
                     if (name.equals("LeftClick")) {
                         moveUpward(tpf); // Move the carrier upward
+
                         synchronized (pauseLock) {
                             isBoxMoved = true; // Mark as moved
                             pauseLock.notify(); // Resume the thread
                         }
                     } else if (name.equals("RightClick")) {
                         moveDownward(); // Move the carrier downward
+
+
+
                         synchronized (pauseLock) {
                             isBoxMoved = true; // Mark as moved
                             pauseLock.notify(); // Resume the thread
@@ -213,19 +221,22 @@ public class Stations extends SimpleApplication {
     };
 
     private void moveUpward(float tpf) {
-            // Define the action to move upward
-            keyframesList.set(4, new Vector3f(10, 0.6f, -5));
-            keyframesList.set(5, new Vector3f(10, 0.6f, -10));
-            keyframesList.set(6, new Vector3f(10, 0.6f, -15));
-            keyframesList.set(7, new Vector3f(10, 0.6f, -20));
-            keyframesList.set(8, new Vector3f(10, 0.6f, -22));
+
+        // Define the action to move upward
+        keyframesList.set(4, new Vector3f(10, 0.6f, -5));
+        keyframesList.set(5, new Vector3f(10, 0.6f, -10));
+        keyframesList.set(6, new Vector3f(10, 0.6f, -15));
+        keyframesList.set(7, new Vector3f(10, 0.6f, -20));
+        keyframesList.set(8, new Vector3f(10, 0.6f, -22));
+
     }
 
     private void moveDownward() {
-            keyframesList.set(4, new Vector3f(10, 0.6f, 5));
-            keyframesList.set(5, new Vector3f(10, 0.6f, 10));
-            keyframesList.set(6, new Vector3f(10, 0.6f, 15));
-            keyframesList.set(7, new Vector3f(10, 0.6f, 20));
+
+        keyframesList.set(4, new Vector3f(10, 0.6f, 5));
+        keyframesList.set(5, new Vector3f(10, 0.6f, 10));
+        keyframesList.set(6, new Vector3f(10, 0.6f, 15));
+        keyframesList.set(7, new Vector3f(10, 0.6f, 20));
     }
 
     private void createHorizontalConveyorBelt() {
@@ -388,6 +399,46 @@ public class Stations extends SimpleApplication {
         rootNode.attachChild(conveyorBeltNode);
     }
 
+    private void initStorageBoxes(){
+
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++){
+                for (int k = 0; k < 15; k++) {
+                    Node storage = (Node) assetManager.loadModel("Models/box-large.obj"); // Add your .glb file path
+
+
+                    storage.setLocalTranslation(8.6f + (i * 3), 1f + (j * 2), -22f-(k*2)); // Position the station at the start of the conveyor belt
+                    storage.rotate(0, FastMath.HALF_PI, 0);
+                    storage.scale(2f);
+
+                    conveyorBeltNode.attachChild(storage);
+                    rootNode.attachChild(conveyorBeltNode);
+                }
+            }
+        }
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++){
+                for (int k = 0; k < 15; k++) {
+                    Node storage = (Node) assetManager.loadModel("Models/box-large.obj"); // Add your .glb file path
+
+
+                    storage.setLocalTranslation(8.6f - (i * 3), 1f + (j * 2), -22f-(k*2)); // Position the station at the start of the conveyor belt
+                    storage.rotate(0, FastMath.HALF_PI, 0);
+                    storage.scale(2f);
+
+                    conveyorBeltNode.attachChild(storage);
+                    rootNode.attachChild(conveyorBeltNode);
+                }
+            }
+        }
+
+        // Add title "Goods Intake" above the station
+
+
+
+    }
+
+
     private final Object pauseLock = new Object();
     private void initCarrier(AssetManager assetManager, List<Vector3f> keyframes, float speed) {
         // Load the box-small.obj model for the carrier
@@ -443,71 +494,31 @@ public class Stations extends SimpleApplication {
                             enqueue(() -> tooltip.setCullHint(Spatial.CullHint.Always));  // Hide tooltip
                             isPaused = false;
                         }
+                        if (interpolated.x == 10f && interpolated.y == 0.6f && interpolated.z == -20f) {
+                            score += 100;
+                            setScrore(score, scoreText);
+                        }
+                        else if (interpolated.x == 10f && interpolated.y == 0.6f && interpolated.z == 20f) {
+                            score -= 50;
+                            setScrore(score, scoreText);
+                        }
+
 
                         Thread.sleep(10);  // Control movement speed (10ms step delay)
                     }
                 }
+
                 enqueue(() -> rootNode.detachChild(carrierNode));
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }).start();
     }
 
-    private void initQuitButton() {
-        BitmapText quitButton = new BitmapText(guiFont, false);
-
-        quitButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
-        quitButton.setText("Quit");
-        quitButton.setColor(ColorRGBA.White);
-        quitButton.setLocalTranslation(10, quitButton.getLineHeight() + 10, 0);  // Position the button at the bottom left corner
-        guiNode.attachChild(quitButton);
-
-        inputManager.addMapping("Quit", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(new ActionListener() {
-            @Override
-            public void onAction(String name, boolean isPressed, float tpf) {
-                if (name.equals("Quit") && !isPressed) {
-                    Vector2f click2d = inputManager.getCursorPosition();
-                    float x = click2d.x;
-                    float y = click2d.y;
-                    float buttonX = quitButton.getLocalTranslation().x;
-                    float buttonY = quitButton.getLocalTranslation().y;
-                    float buttonWidth = quitButton.getLineWidth();
-                    float buttonHeight = quitButton.getLineHeight();
-
-                    if (x >= buttonX && x <= buttonX + buttonWidth && y >= buttonY - buttonHeight && y <= buttonY) {
-                        stop();  // Close the application
-                    }
-                }
-            }
-        }, "Quit");
-    }
-    private void levelUp() {
-        BitmapText levelUpButton = new BitmapText(guiFont, false);
-
-        levelUpButton.setSize(guiFont.getCharSet().getRenderedSize() * 3);
-        levelUpButton.setText("Level Up");
-        levelUpButton.setColor(ColorRGBA.White);
-        levelUpButton.setLocalTranslation(settings.getWidth() - levelUpButton.getLineWidth() - 10, levelUpButton.getLineHeight() + 10, 0);  // Position the button at the bottom right corner
-        guiNode.attachChild(levelUpButton);
-
-        inputManager.addMapping("Level up", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addListener(new ActionListener() {
-            @Override
-            public void onAction(String name, boolean isPressed, float tpf) {
-                if (name.equals("Level up") && !isPressed) {
-                    Conveyor app = new Conveyor();
-                    AppSettings settings = new AppSettings(true);
-                    settings.setTitle("Warehouse Wizardry");
-                    settings.setResolution(1280, 720);
-                    settings.setFullscreen(false);
-                    app.setSettings(settings);
-                    audioNode.stop();
-                    app.start();
-                }
-            }
-        }, "Level up");
+    private void setScrore(int score, BitmapText scoreText) {
+        scoreText.setText("Score: " + score);
+        guiNode.attachChild(scoreText);
     }
 }
-
