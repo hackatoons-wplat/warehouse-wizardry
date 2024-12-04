@@ -10,6 +10,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.system.AppSettings;
 
 import javax.imageio.ImageIO;
@@ -21,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FinalGame extends SimpleApplication {
+    private Node conveyorBeltNode = new Node("ConveyorBelt");
 
     List<Vector3f> accepted = Arrays.asList(
             new Vector3f(0, 0.25f, 0),
@@ -58,7 +60,7 @@ public class FinalGame extends SimpleApplication {
         app.setSettings(settings);
         app.start();
     }
-
+    
     @Override
     public void simpleInitApp() {
         cam.setLocation(new Vector3f(0, 8, 15));
@@ -78,12 +80,53 @@ public class FinalGame extends SimpleApplication {
         upBar(assetManager);
         baseBar(assetManager);
         downBar(assetManager);
+        initStorageBoxes();
         storeDock();
         addAmbientLighting();
 
         // Initialize and spawn boxes
         BoxManager boxManager = new BoxManager(assetManager, rootNode, accepted, rejected, scoreText);
         boxManager.spawnAndAnimateBoxes(100);
+    }
+
+    private void initStorageBoxes() {
+        // Combine both loops and use a flag to adjust the x position
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                for (int k = 0; k < 15; k++) {
+                    Node storage = (Node) assetManager.loadModel("Models/box-large.obj"); // Load box model
+
+                    // Adjust the x translation based on the iteration
+                    float xPosition = (i < 15) ? 10f + (i * 3) : 10f - (i * 3);
+                    storage.setLocalTranslation(xPosition, 1f + (j * 2), -12f - (k * 2));
+                    // Position the storage box
+                    storage.rotate(0, FastMath.HALF_PI, 0); // Rotate the box
+                    storage.scale(2f); // Scale the box
+
+                    conveyorBeltNode.attachChild(storage); // Attach to conveyor belt node
+                    rootNode.attachChild(conveyorBeltNode); // Attach conveyor belt to root node
+                }
+            }
+        }
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                for (int k = 0; k < 15; k++) {
+                    Node storage = (Node) assetManager.loadModel("Models/box-large.obj"); // Load box model
+
+                    // Adjust the x translation based on the iteration
+                    float xPosition = (i < 15) ? 10f - (i * 3) : 10f + (i * 3);
+                    storage.setLocalTranslation(xPosition, 1f + (j * 2), -12f - (k * 2));
+                    // Position the storage box
+                    storage.rotate(0, FastMath.HALF_PI, 0); // Rotate the box
+                    storage.scale(2f); // Scale the box
+
+                    conveyorBeltNode.attachChild(storage); // Attach to conveyor belt node
+                    rootNode.attachChild(conveyorBeltNode); // Attach conveyor belt to root node
+                }
+            }
+        }
+
+        // Add title "Goods Intake" above the station (optional)
     }
 
     public void addAmbientLighting() {

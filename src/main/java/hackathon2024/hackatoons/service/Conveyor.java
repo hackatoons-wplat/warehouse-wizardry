@@ -35,6 +35,7 @@ public class Conveyor extends SimpleApplication {
     private float timeSinceLastSpawn = 0;         // Timer to track time since last spawn
     private int Score = 0;
     private BitmapText scoreText;
+    private boolean clickedRight = false, clickedLeft = false;
     public static void main(String[] args) {
 
         Conveyor app = new Conveyor();
@@ -69,6 +70,7 @@ public class Conveyor extends SimpleApplication {
         initSystemExit();
         initStorage();
         initFloor();
+        initMouseInput();
         initConveyorBarsVertical(assetManager);
         initConveyorBarsVerticalUp(assetManager);
         addAmbientLighting();
@@ -111,8 +113,6 @@ public class Conveyor extends SimpleApplication {
         if (progress < 1f) {
             // Update position
             Vector3f newPosition = new Vector3f().interpolateLocal(start, end, progress);
-            carrierNode.setLocalTranslation(newPosition);
-            progress += step;
             carrierNode.setUserData("progress", progress);  // Save progress
         } else {
             // Carrier reached the end of the path, reset progress for next movement
@@ -177,11 +177,12 @@ public class Conveyor extends SimpleApplication {
 
     // Start moving the carrier along keyframes
     private void startCarrierMovement(Node carrierNode, List<Vector3f> keyframes, float speed) {
+
         new Thread(() -> {
             try {
                 Random random = new Random();
                 int randomNumber = random.nextInt(2);
-                if (randomNumber == 0) {
+                if (randomNumber == 0 ) {
                     for (int i = 0; i < this.keyframes.size() - 1; i++) {
                         Vector3f start = this.keyframes.get(i);
                         Vector3f end = this.keyframes.get(i + 1);
@@ -205,6 +206,12 @@ public class Conveyor extends SimpleApplication {
 
                     // Apply the material to the spatial
                     carrierNode.setMaterial(redMaterial);
+
+                    //Node carrierNodeNew = new Node("CarrierFailed");
+                    //carrierNode.detachChild(carrierNode.getChild());
+                    //carrierNodeNew.attachChild(assetManager.loadModel("Models/box-large.obj"));
+                    //rootNode.attachChild(carrierNodeNew);
+
                         for (int i = 0; i < this.keyframes_exit.size() - 1; i++) {
                             Vector3f start = this.keyframes_exit.get(i);
                             Vector3f end = this.keyframes_exit.get(i + 1);
@@ -341,7 +348,7 @@ public class Conveyor extends SimpleApplication {
         // Add title "Goods Intake" above the station
         BitmapText title = new BitmapText(guiFont, false);
         title.setSize(1f);
-        title.setText("StockRoom");
+        title.setText("Stock Room");
         title.setColor(ColorRGBA.White);
         title.setLocalTranslation(10f, 3f, -10); // Adjust the position as needed
         conveyorBeltNode.attachChild(title);
@@ -372,4 +379,37 @@ public class Conveyor extends SimpleApplication {
         conveyorBeltNode.attachChild(systemExit);
         rootNode.attachChild(conveyorBeltNode);
     }
+
+    private void initMouseInput() {
+
+        // Map mouse buttons to actions
+
+        inputManager.addMapping("StopConveyor", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT)); // Right click
+
+        inputManager.addMapping("ResumeConveyor", new MouseButtonTrigger(MouseInput.BUTTON_LEFT)); // Left click
+
+        // Add listeners for the actions
+
+        inputManager.addListener(actionListener, "StopConveyor", "ResumeConveyor");
+
+    }
+
+    private ActionListener actionListener = (name, isPressed, tpf) -> {
+
+        if (name.equals("StopConveyor") && !isPressed) {
+            System.out.println("Here");
+
+
+        }
+
+        if (name.equals("ResumeConveyor") && !isPressed) {
+
+            System.out.println("Here left");
+
+
+
+        }
+
+    };
+
 }

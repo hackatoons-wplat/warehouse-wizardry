@@ -14,9 +14,10 @@ public class Game  extends SimpleApplication {
     public void simpleInitApp() {
         Conveyor conveyor = new Conveyor();
         Light light = new Light();
-        light.addAmbientLighting();
+
         conveyor.initConveyorUp(assetManager);
         conveyor.initConveyorBarsDown(assetManager);
         conveyor.initConveyorBase(assetManager);
+        light.addAmbientLighting();
     }
 }
