@@ -8,12 +8,17 @@ import com.jme3.scene.Node;
 import com.jme3.cinematic.MotionPath;
 import com.jme3.cinematic.events.MotionEvent;
 import com.jme3.math.FastMath;
+import com.jme3.font.BitmapFont;
+import com.jme3.font.BitmapText;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class BoxManager {
+
+    private int score = 0; // Track the score
+    private BitmapText scoreText; // Text element to display the score
 
     private final AssetManager assetManager;
     private final Node rootNode;
@@ -116,7 +121,7 @@ public class BoxManager {
         isCooldown = true;
         new Thread(() -> {
             try {
-                Thread.sleep(6000); // Wait for 3 seconds (stop at (10, 0.25, 0))
+                Thread.sleep(10000); // Wait for 3 seconds (stop at (10, 0.25, 0))
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
